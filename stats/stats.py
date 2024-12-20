@@ -143,6 +143,17 @@ class StatisticalAnalysis:
                 else:
                     return self.kruskal_wallis_test()
 
+    def _get_stars(self):
+        if self.test_p_value is not None:
+            if self.test_p_value < 0.001:
+                return 3
+            elif self.test_p_value < 0.01:
+                return 2
+            elif self.test_p_value < 0.05:
+                return 1
+            else:
+                return 0
+        return 0
 
     def GetSigmas(self):
         if self.test_stat is not None:
@@ -154,6 +165,12 @@ class StatisticalAnalysis:
 
     def GetTestName(self):
         return self.test_name
+
+    def GetStarsInt(self):
+        return self.n_stars
+
+    def GetStarsStr(self):
+        return '*' * self.n_stars if self.n_stars else 'ns'
 
     def _create_result_dict(self):
         return {
