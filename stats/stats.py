@@ -59,13 +59,6 @@ class StatisticalAnalysis:
 
         return D, 0
 
-    def _create_result_dict(self):
-        return {
-            "TestName": self.test_name,
-            "Statistic": self.test_stat,
-            "PValue": self.test_p_value
-        }
-
     def t_test(self):
         if self.paired:
             t_stat, t_p_value = stats.ttest_rel(self.data_list[0], self.data_list[1])
@@ -149,7 +142,6 @@ class StatisticalAnalysis:
                 else:
                     return self.kruskal_wallis_test()
 
-        return self._create_result_dict()
 
     def GetSigmas(self):
         if self.test_stat is not None:
@@ -162,6 +154,13 @@ class StatisticalAnalysis:
     def GetTestName(self):
         return self.test_name
 
+    def _create_result_dict(self):
+        return {
+            "TestName": self.test_name,
+            "Statistic": self.test_stat.item(),
+            "p-value": self.test_p_value.item(),
+        }
+
 # Example usage
 data1 = np.random.normal(0, 1, 100)
 data2 = np.random.normal(1, 1, 100)
@@ -171,9 +170,9 @@ analysis = StatisticalAnalysis([data1, data2], paired=False, tail='two-tailed')
 
 # Running the auto method to automatically decide the test
 results = analysis.auto()
-print(f"{results['TestName']} result: statistic={results['Statistic']}, p-value={results['PValue']}")
+print(f"{results['TestName']} result: statistic={results['Statistic']}, p-value={results['p-value']}")
 
-# Accessing the new methods
+# Accessing separate attributes:
 sigmas = analysis.GetSigmas()
 p_value = analysis.GetP()
 test_name = analysis.GetTestName()
