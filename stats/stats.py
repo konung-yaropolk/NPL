@@ -34,6 +34,7 @@ class StatisticalAnalysis:
         return False, "Not normal"
 
     def lilliefors_test(self, data):
+        ''' Lilliefors Test (Kolmogorov-Smirnov test) '''
         data = np.sort(data)
         n = len(data)
         mean = np.mean(data)
