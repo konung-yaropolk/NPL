@@ -1,24 +1,29 @@
+import CsvParser as csv
 import numpy as np
 import scipy.stats as stats
+
 
 class __StatisticalTests():
     '''Statistical tests mixin'''
 
     def t_test(self):
         if self.paired:
-            t_stat, t_p_value = stats.ttest_rel(self.data_list[0], self.data_list[1])
+            t_stat, t_p_value = stats.ttest_rel(
+                self.data_list[0], self.data_list[1])
         else:
-            t_stat, t_p_value = stats.ttest_ind(self.data_list[0], self.data_list[1])
-        
+            t_stat, t_p_value = stats.ttest_ind(
+                self.data_list[0], self.data_list[1])
+
         if self.tails == 1:
             t_p_value /= 2
-        
+
         self.test_name = "t-test"
         self.test_stat = t_stat
         self.test_p_value = t_p_value
 
     def mann_whitney_u_test(self):
-        stat, p_value = stats.mannwhitneyu(self.data_list[0], self.data_list[1], alternative='two-sided' if self.tails == 2 else 'greater')
+        stat, p_value = stats.mannwhitneyu(
+            self.data_list[0], self.data_list[1], alternative='two-sided' if self.tails == 2 else 'greater')
         self.test_name = "Mann-Whitney U test"
         self.test_stat = stat
         self.test_p_value = p_value
@@ -50,7 +55,6 @@ class __StatisticalTests():
         self.test_name = "Friedman test"
         self.test_stat = stat
         self.test_p_value = p_value
-    
 
 
 class __NormalityTests():
@@ -61,7 +65,7 @@ class __NormalityTests():
         stat, p_value = stats.shapiro(data)
         if p_value > 0.05:
             return True, "Shapiro-Wilk"
-        
+
         # Lilliefors Test (Kolmogorov-Smirnov test)
         lilliefors_stat, lilliefors_p_value = self.lilliefors_test(data)
         if lilliefors_p_value > 0.05:
@@ -81,7 +85,7 @@ class __NormalityTests():
         D_minus = np.max(cdf_values - (np.arange(n) / n))
         D = max(D_plus, D_minus)
 
-        # Use critical values from the Lilliefors table 
+        # Use critical values from the Lilliefors table
         # (two-sided test, approximations for large n)
         critical_values = {
             100: 0.072,
@@ -95,14 +99,14 @@ class __NormalityTests():
             if n <= size:
                 return D, 1 - critical_value if D < critical_value else 0
 
-        return D, 0    
+        return D, 0
 
 
 class StatisticalAnalysis(__StatisticalTests, __NormalityTests):
     '''
         The main class
         *documentation placeholder*
-    
+
     '''
 
     def __init__(self, data_list, paired=False, tails=2):
@@ -116,21 +120,24 @@ class StatisticalAnalysis(__StatisticalTests, __NormalityTests):
         self.test_p_value = None
 
         # Assertion block
-        assert self.tails in [1,2], "Tails parameter can be 1 or 2 only"
-        assert len(self.data_list) > 1, "At least two groups of data must be given"
-        assert all(len(lst) > 1 for lst in self.data_list), "Each group must contain at least two vaues"        
+        assert self.tails in [1, 2], "Tails parameter can be 1 or 2 only"
+        assert len(
+            self.data_list) > 1, "At least two groups of data must be given"
+        assert all(len(
+            lst) > 2 for lst in self.data_list), "Each group must contain at least three values"
         if self.paired == True:
-            assert all(len(lst) == len(self.data_list[0]) for lst in self.data_list), "Paired groups must be the same length"
+            assert all(len(lst) == len(
+                self.data_list[0]) for lst in self.data_list), "Paired groups must be the same length"
 
         for data in data_list:
             normal, method = self.check_normality(data)
             self.normals.append(normal)
             self.methods.append(method)
-            print(f"Data is {'normal' if normal else 'not normal'} (checked by {method})")
+            print(
+                f"Data is {'normal' if normal else 'not normal'} (checked by {method})")
 
         self.__auto()
         self.result = self.__create_result_dict()
-
 
     def __auto(self):
         self.n_groups = len(self.data_list)
@@ -158,6 +165,8 @@ class StatisticalAnalysis(__StatisticalTests, __NormalityTests):
 
     def __make_stars(self):
         if self.test_p_value is not None:
+            if self.test_p_value < 0.0001:
+                return 4
             if self.test_p_value < 0.001:
                 return 3
             elif self.test_p_value < 0.01:
@@ -167,25 +176,24 @@ class StatisticalAnalysis(__StatisticalTests, __NormalityTests):
             else:
                 return 0
         return 0
-    
+
     def __create_result_dict(self):
 
         self.stars_int = self.__make_stars()
         self.stars_str = '*' * self.stars_int if self.stars_int else 'ns'
 
         return {
-            "p-value" : self.test_p_value.item(),
-            "TestName" : self.test_name,
-            "N_Groups" : self.n_groups,
-            "ParametricStratistics" : self.parametric,
-            "PairedStratistics" : self.paired,
-            "Tails" : self.tails,
-            "Stars" :  self.stars_int,
-            "StarsPrinted" : self.stars_str,
+            "p-value": self.test_p_value.item(),
+            "TestName": self.test_name,
+            "N_Groups": self.n_groups,
+            "ParametricStratistics": self.parametric,
+            "PairedStratistics": self.paired,
+            "Tails": self.tails,
+            "Stars":  self.stars_int,
+            "StarsPrinted": self.stars_str,
             "Statistic": self.test_stat.item(),
         }
 
- 
     def GetResults(self):
         return self.result
 
@@ -207,16 +215,17 @@ class StatisticalAnalysis(__StatisticalTests, __NormalityTests):
         return self.stars_str
 
 
-
 # Example usage
-data = [np.random.normal(i, 1, 100) for i in range(3)]
+# data = [np.random.normal(i, 1, 100) for i in range(3)]
 
-analysis = StatisticalAnalysis(data, paired=True, tails=2)
-
-# Running the auto method to automatically decide the test
+new_csv = csv.LoadCsv('data.csv')
+data = new_csv.ParseCsv(2)
+print(data)
+analysis = StatisticalAnalysis(data, paired=False, tails=2)
 results = analysis.GetResults()
+
+print('')
 print(results)
-#print(f"{results['TestName']} result: statistic={results['Statistic']}, p-value={results['p-value']}")
 
 # Accessing separate attributes:
 p_value = analysis.GetP()
