@@ -19,14 +19,14 @@ class __StatisticalTests():
 
         self.test_name = "t-test"
         self.test_stat = t_stat
-        self.test_p_value = t_p_value
+        self.p_value = t_p_value
 
     def mann_whitney_u_test(self):
         stat, p_value = stats.mannwhitneyu(
             self.data_list[0], self.data_list[1], alternative='two-sided' if self.tails == 2 else 'greater')
         self.test_name = "Mann-Whitney U test"
         self.test_stat = stat
-        self.test_p_value = p_value
+        self.p_value = p_value
 
     def wilcoxon_signed_rank_test(self):
         stat, p_value = stats.wilcoxon(self.data_list[0], self.data_list[1])
@@ -34,7 +34,7 @@ class __StatisticalTests():
             p_value = 1 - p_value
         self.test_name = "Wilcoxon signed-rank test"
         self.test_stat = stat
-        self.test_p_value = p_value
+        self.p_value = p_value
 
     def anova(self):
         stat, p_value = stats.f_oneway(*self.data_list)
@@ -42,19 +42,19 @@ class __StatisticalTests():
             p_value /= 2
         self.test_name = "ANOVA"
         self.test_stat = stat
-        self.test_p_value = p_value
+        self.p_value = p_value
 
     def kruskal_wallis_test(self):
         stat, p_value = stats.kruskal(*self.data_list)
         self.test_name = "Kruskal-Wallis test"
         self.test_stat = stat
-        self.test_p_value = p_value
+        self.p_value = p_value
 
     def friedman_test(self):
         stat, p_value = stats.friedmanchisquare(*self.data_list)
         self.test_name = "Friedman test"
         self.test_stat = stat
-        self.test_p_value = p_value
+        self.p_value = p_value
 
 
 class __NormalityTests():
@@ -62,8 +62,8 @@ class __NormalityTests():
 
     def check_normality(self, data):
         # Shapiro-Wilk Test
-        stat, p_value = stats.shapiro(data)
-        if p_value > 0.05:
+        sw_stat, sw_p_value = stats.shapiro(data)
+        if sw_p_value > 0.05:
             return True, "Shapiro-Wilk"
 
         # Lilliefors Test (Kolmogorov-Smirnov test)
@@ -117,19 +117,30 @@ class StatisticalAnalysis(__StatisticalTests, __NormalityTests):
         self.methods = []
         self.test_name = None
         self.test_stat = None
-        self.test_p_value = None
+        self.p_value = None
+        self.warning_flag_non_numeric_data = False
+
+        # adjusting input data type
+        self.data_list = self.__floatify_recursive(self.data_list)
+        if self.warning_flag_non_numeric_data:
+            print('\nWarnig: Non-numeric data was found in groups and ignored.')
+            print('        Make sure the input data is correct to get the correct results\n')
 
         # Assertion block
-        assert self.tails in [1, 2], "Tails parameter can be 1 or 2 only"
-        assert len(
-            self.data_list) > 1, "At least two groups of data must be given"
-        assert all(len(
-            lst) > 2 for lst in self.data_list), "Each group must contain at least three values"
-        if self.paired == True:
-            assert all(len(lst) == len(
-                self.data_list[0]) for lst in self.data_list), "Paired groups must be the same length"
-
-        for data in data_list:
+        try:
+            assert self.tails in [1, 2], "Tails parameter can be 1 or 2 only"
+            assert len(
+                self.data_list) > 1, "At least two groups of data must be given"
+            assert all(len(
+                lst) > 2 for lst in self.data_list), "Each group must contain at least three values"
+            if self.paired == True:
+                assert all(len(lst) == len(
+                    self.data_list[0]) for lst in self.data_list), "Paired groups must be the same length"
+        except AssertionError as error:
+            print('\nError: ', error, '\n')
+            exit()
+            
+        for data in self.data_list:
             normal, method = self.check_normality(data)
             self.normals.append(normal)
             self.methods.append(method)
@@ -163,38 +174,75 @@ class StatisticalAnalysis(__StatisticalTests, __NormalityTests):
                 else:
                     return self.kruskal_wallis_test()
 
+    def __floatify_recursive(self, data):
+        if isinstance(data, list):
+            # Recursively process sublists and filter out None values
+            processed_list = [self.__floatify_recursive(item) for item in data]
+            return [item for item in processed_list if item is not None]
+        else:
+            try:
+                # Try to convert the item to float
+                return np.float64(data)
+            except (ValueError, TypeError):
+                # If conversion fails, replace with None
+                self.warning_flag_non_numeric_data = True
+                return None
+        
     def __make_stars(self):
-        if self.test_p_value is not None:
-            if self.test_p_value < 0.0001:
+        if self.p_value is not None:
+            if self.p_value < 0.0001:
                 return 4
-            if self.test_p_value < 0.001:
+            if self.p_value < 0.001:
                 return 3
-            elif self.test_p_value < 0.01:
+            elif self.p_value < 0.01:
                 return 2
-            elif self.test_p_value < 0.05:
+            elif self.p_value < 0.05:
                 return 1
             else:
                 return 0
         return 0
 
+    def __make_p_value_printed(self):
+        p = self.p_value.item()
+        if p is not None:
+            if p > 0.99:
+                return "p > 0.99"
+            elif p >= 0.01:
+                return f"{p:.2g}"
+            elif p >= 0.001:
+                return f"{p:.3g}"
+            elif p >= 0.0001:
+                return f"{p:.4g}"
+            else:
+                return "p < 0.0001"
+        return 'NaN'
+
     def __create_result_dict(self):
 
         self.stars_int = self.__make_stars()
-        self.stars_str = '*' * self.stars_int if self.stars_int else 'ns'
+        self.stars_str = '*' * self.stars_int if self.stars_int else 'ns'      
 
         return {
-            "p-value": self.test_p_value.item(),
+            "p-value" : self.__make_p_value_printed(),
+            "StarsPrinted": self.stars_str,
             "TestName": self.test_name,
             "N_Groups": self.n_groups,
+            "GroupSize": [len(self.data_list[i]) for i in range(len(self.data_list))],
             "ParametricStratistics": self.parametric,
             "PairedStratistics": self.paired,
             "Tails": self.tails,
+            "p-value_exact": self.p_value.item(),
             "Stars":  self.stars_int,
-            "StarsPrinted": self.stars_str,
             "Statistic": self.test_stat.item(),
         }
 
-    def GetResults(self):
+    def PrintResult(self):
+        print('')
+        for i in self.result:
+            shift = 21 - len(i) 
+            print(i, ':', ' ' *shift, self.result[i])    
+
+    def GetResult(self):
         return self.result
 
     def GetStats(self):
@@ -203,7 +251,7 @@ class StatisticalAnalysis(__StatisticalTests, __NormalityTests):
         return None
 
     def GetP(self):
-        return self.test_p_value
+        return self.p_value
 
     def GetTestName(self):
         return self.test_name
@@ -211,26 +259,19 @@ class StatisticalAnalysis(__StatisticalTests, __NormalityTests):
     def GetStarsInt(self):
         return self.stars_int
 
-    def GetStarsStr(self):
+    def GetStarsPrinted(self):
         return self.stars_str
 
 
 # Example usage
-# data = [np.random.normal(i, 1, 100) for i in range(3)]
+#data = [list(np.random.normal(i, 1, 100)) for i in range(3)]
 
-new_csv = csv.LoadCsv('data.csv')
-data = new_csv.ParseCsv(2)
-print(data)
+new_csv = csv.OpenFile('data.csv')
+data = new_csv.Cols[0:4]
+
+
 analysis = StatisticalAnalysis(data, paired=False, tails=2)
-results = analysis.GetResults()
+result = analysis.GetResult()
+analysis.PrintResult()
 
-print('')
-print(results)
 
-# Accessing separate attributes:
-p_value = analysis.GetP()
-test_name = analysis.GetTestName()
-
-print('')
-print(f"P-value: {p_value}")
-print(f"Test name: {test_name}")
