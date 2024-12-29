@@ -1,4 +1,4 @@
-import CsvParser as csv
+import SimpleCsv as csv
 import numpy as np
 import scipy.stats as stats
 

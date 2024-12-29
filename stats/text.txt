@@ -1,0 +1,48 @@
+
+----------------------------------------------------------------------
+Statistics module initiated for data of 2 groups
+
+
+Warnig: Non-numeric data was found in input and ignored.
+        Make sure the input data is correct to get the correct results
+
+
+Group 1                Group 2
+                              
+43.98089                60.26373
+12.58893                49.12973
+6.10114                13.16404
+47.18348                76.15852
+46.87695                41.4002
+39.3766                14.47232
+32.57511                37.1221
+24.46042                57.10482
+12.51913                45.29162
+21.62817                17.56276
+52.1361                45.60713
+39.72808                81.98641
+
+
+Normality checked by both Shapiro-Wilk and Lilliefors tests
+Group data is normal if at least one result is positive:
+
+    Group 1: disrtibution is normal
+    Group 2: disrtibution is normal
+
+
+p-value :                0.027
+StarsPrinted :           *
+TestName :               t-test
+N_Groups :               2
+GroupSize :              [12, 12]
+ParametricStratistics :  True
+PairedStratistics :      True
+Tails :                  1
+p-value_exact :          0.026577158025259538
+Stars :                  1
+Statistic :              -2.1659116369113023
+
+
+Results above are accessible as a dictionary via GetResult() method
+-------------------------------------------------------------------
+
