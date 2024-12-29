@@ -10,7 +10,7 @@ class OpenFile:
     def __init__(self, file_path: str) -> None:
         self.file_path = file_path
 
-        with open(self.file_path, 'r') as file:
+        with open(self.file_path, 'r', encoding='utf-8-sig') as file:
             self.Rows = list(csv.reader(file))
 
         self.Cols = self.transpose_matrix(self.Rows)

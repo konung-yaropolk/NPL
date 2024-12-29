@@ -112,6 +112,7 @@ class __TextFormatting():
     '''
 
     def print_groups(self, delimiter='                ', max_length=15):
+        self.log('')
         # Get the number of groups (rows) and the maximum length of rows
         data = self.groups_list
         num_groups = len(data)
@@ -121,8 +122,8 @@ class __TextFormatting():
         header = [f"Group {i+1}" for i in range(num_groups)]
         space = [' '*7 for i in range(num_groups)]
         line = ['_'*7 for i in range(num_groups)]
-        print(delimiter.join(header))
-        print(delimiter.join(space))
+        self.log(delimiter.join(header))
+        self.log(delimiter.join(space))
         
         # Print each column with a placeholder if longer than max_length
         for i in range(max_len):
@@ -145,7 +146,7 @@ class __TextFormatting():
                     else:
                         row_values.append('')
             if all_values_empty: break
-            print(delimiter.join(row_values))
+            self.log(delimiter.join(row_values))
 
     def format_result(self):
         self.log('\n')
@@ -215,7 +216,7 @@ class StatisticalAnalysis(__StatisticalTests, __NormalityTests, __TextFormatting
 
     '''
 
-    def __init__(self, groups_list, paired=False, tails=2):
+    def __init__(self, groups_list, paired=False, tails=2, test=''):
         self.groups_list = groups_list
         self.paired = paired
         self.tails = tails
@@ -228,7 +229,7 @@ class StatisticalAnalysis(__StatisticalTests, __NormalityTests, __TextFormatting
         self.summary = ''
 
         self.log("\n----------------------------------------------------------------------")
-        self.log("Statistics module initiated for data of {} groups".format(len(self.groups_list)))
+        self.log("Statistics module initiated for data of {} groups\n".format(len(self.groups_list)))
 
         # adjusting input data type
         self.groups_list = self.__floatify_recursive(self.groups_list)
@@ -252,7 +253,7 @@ class StatisticalAnalysis(__StatisticalTests, __NormalityTests, __TextFormatting
 
         self.print_groups()
 
-        self.log("\nNormality checked by both Shapiro-Wilk and Lilliefors tests")
+        self.log("\n\nNormality checked by both Shapiro-Wilk and Lilliefors tests")
         self.log("Group data is normal if at least one result is positive:\n")
         for i, data in enumerate(self.groups_list):
             normal, method = self.check_normality(data)
@@ -263,7 +264,7 @@ class StatisticalAnalysis(__StatisticalTests, __NormalityTests, __TextFormatting
         self.__auto()
         self.result = self.create_result_dict()
         self.format_result()
-        self.log('\nResults above are accessible as a dictionary via GetResult() method')
+        self.log('\n\nResults above are accessible as a dictionary via GetResult() method')
         self.log("-------------------------------------------------------------------\n")
 
     def __auto(self):
@@ -317,12 +318,13 @@ class StatisticalAnalysis(__StatisticalTests, __NormalityTests, __TextFormatting
 
 
 # Example usage
+
 #data = [list(np.random.normal(i, 1, 100)) for i in range(3)]
 
 new_csv = csv.OpenFile('data.csv')
-data = new_csv.Cols[0:4]
+data = new_csv.Cols[2:4]
 
 
-analysis = StatisticalAnalysis(data, paired=False, tails=2)
+analysis = StatisticalAnalysis(data, paired=True, tails=1)
 result = analysis.GetResult()
 
