@@ -148,11 +148,11 @@ class __TextFormatting():
             if all_values_empty: break
             self.log(delimiter.join(row_values))
 
-    def format_result(self):
-        self.log('\n')
-        for i in self.result:
+    def print_results(self):
+        self.log('\n\nResults: \n')
+        for i in self.results:
             shift = 21 - len(i) 
-            self.log(i, ':', ' ' *shift, self.result[i])    
+            self.log(i, ':', ' ' *shift, self.results[i])    
     
     def make_stars(self):
         if self.p_value is not None:
@@ -183,7 +183,7 @@ class __TextFormatting():
                 return "p < 0.0001"
         return 'NaN'
 
-    def create_result_dict(self):
+    def create_results_dict(self):
 
         self.stars_int = self.make_stars()
         self.stars_str = '*' * self.stars_int if self.stars_int else 'ns'      
@@ -209,14 +209,30 @@ class __TextFormatting():
         self.summary += '\n    ' + message
 
 
-class StatisticalAnalysis(__StatisticalTests, __NormalityTests, __TextFormatting):
+class __InputFormatting():
+    def floatify_recursive(self, data):
+        if isinstance(data, list):
+            # Recursively process sublists and filter out None values
+            processed_list = [self.floatify_recursive(item) for item in data]
+            return [item for item in processed_list if item is not None]
+        else:
+            try:
+                # Try to convert the item to float
+                return np.float64(data)
+            except (ValueError, TypeError):
+                # If conversion fails, replace with None
+                self.warning_flag_non_numeric_data = True
+                return None
+
+
+class StatisticalAnalysis(__StatisticalTests, __NormalityTests, __TextFormatting, __InputFormatting):
     '''
         The main class
         *documentation placeholder*
 
     '''
 
-    def __init__(self, groups_list, paired=False, tails=2, test=''):
+    def __init__(self, groups_list, paired=False, tails=2, test='auto'):
         self.groups_list = groups_list
         self.paired = paired
         self.tails = tails
@@ -227,12 +243,17 @@ class StatisticalAnalysis(__StatisticalTests, __NormalityTests, __TextFormatting
         self.p_value = None
         self.warning_flag_non_numeric_data = False
         self.summary = ''
+        self.n_groups = len(self.groups_list)
+        # self.__run_test(test)
 
-        self.log("\n----------------------------------------------------------------------")
+    def __run_test(self, test='auto'):
+        self.results = {}
+
+        self.log("\n" + '-'*67)
         self.log("Statistics module initiated for data of {} groups\n".format(len(self.groups_list)))
 
         # adjusting input data type
-        self.groups_list = self.__floatify_recursive(self.groups_list)
+        self.groups_list = self.floatify_recursive(self.groups_list)
         if self.warning_flag_non_numeric_data:
             self.log('\nWarnig: Non-numeric data was found in input and ignored.')
             self.log('        Make sure the input data is correct to get the correct results\n')
@@ -244,32 +265,59 @@ class StatisticalAnalysis(__StatisticalTests, __NormalityTests, __TextFormatting
                 self.groups_list) > 1, "At least two groups of data must be given"
             assert all(len(
                 lst) > 2 for lst in self.groups_list), "Each group must contain at least three values"
-            if self.paired == True:
-                assert all(len(lst) == len(
-                    self.groups_list[0]) for lst in self.groups_list), "Paired groups must be the same length"
+            assert not (self.paired == True and not all(len(lst) == len(
+                    self.groups_list[0]) for lst in self.groups_list)), "Paired groups must be the same length"
+            assert not (test == 'friedman' and not all(len(lst) == len(
+                    self.groups_list[0]) for lst in self.groups_list)), "Paired groups must be the same length for Friedman Chi Square test"            
+            assert not (test == 'wilcoxon' and not all(len(lst) == len(
+                    self.groups_list[0]) for lst in self.groups_list)), "Paired groups must be the same length for Wilcoxon signed-rank test"     
+            assert not (test == 'friedman' and len(self.groups_list) < 3), "At least three groups of data must be given for Friedman Chi Square test"
+            assert not (test == 'wilcoxon' and len(self.groups_list) > 2), "Only two groups of data must be given for Wilcoxon signed-rank test"
         except AssertionError as error:
-            print('\nError: ', error, '\n')
-            exit()
+            print('\nError: ', error)
+            self.log('-'*67 + '\n')
+            return
 
         self.print_groups()
 
         self.log("\n\nNormality checked by both Shapiro-Wilk and Lilliefors tests")
-        self.log("Group data is normal if at least one result is positive:\n")
+        self.log("Group data is normal if at least one results is positive:\n")
         for i, data in enumerate(self.groups_list):
             normal, method = self.check_normality(data)
             self.normals.append(normal)
             self.methods.append(method)
             self.log(f"    Group {i+1}: disrtibution is {'normal' if normal else 'not normal'}")
-            
-        self.__auto()
-        self.result = self.create_result_dict()
-        self.format_result()
+        self.parametric = all(self.normals)
+
+        self.log('\n')
+        self.log('Parametric Statistics:', self.parametric)
+        self.log('Paired Statistics:', self.paired)
+        self.log('Groups:', self.n_groups)
+
+        self.log('Test chosen by user:', test)
+
+        if test == 'anova':
+            self.anova()
+        elif test == 'friedman':
+            self.friedman_test() 
+        elif test == 'kruskal_wallis':
+            self.kruskal_wallis_test()   
+        elif test == 'mann_whitney':
+            self.mann_whitney_u_test()
+        elif test == 't-test':
+            self.t_test()
+        elif test == 'wilcoxon':
+            self.wilcoxon_signed_rank_test()
+        else:
+            self.log('Automatic test selection preformed.')
+            self.__auto()  
+
+        self.results = self.create_results_dict()
+        self.print_results()
         self.log('\n\nResults above are accessible as a dictionary via GetResult() method')
-        self.log("-------------------------------------------------------------------\n")
+        self.log('-'*67 + '\n')
 
     def __auto(self):
-        self.n_groups = len(self.groups_list)
-        self.parametric = all(self.normals)
 
         if self.n_groups == 2:
             if self.paired:
@@ -290,23 +338,34 @@ class StatisticalAnalysis(__StatisticalTests, __NormalityTests, __TextFormatting
                     return self.anova()
                 else:
                     return self.kruskal_wallis_test()
-                
-    def __floatify_recursive(self, data):
-        if isinstance(data, list):
-            # Recursively process sublists and filter out None values
-            processed_list = [self.__floatify_recursive(item) for item in data]
-            return [item for item in processed_list if item is not None]
-        else:
-            try:
-                # Try to convert the item to float
-                return np.float64(data)
-            except (ValueError, TypeError):
-                # If conversion fails, replace with None
-                self.warning_flag_non_numeric_data = True
-                return None
-        
+
+    def RunAuto(self):
+        self.__run_test(test='auto') 
+
+    def RunAnova(self):
+        self.__run_test(test='anova')
+
+    def RunFriedman(self):
+        self.__run_test(test='friedman')
+
+    def RunKruskalWallis(self):
+        self.__run_test(test='kruskal_wallis')
+
+    def RunMannWhitney(self):
+        self.__run_test(test='mann_whitney')
+
+    def RunTtest(self):
+        self.__run_test(test='t-test')
+
+    def RunWilcoxon(self):
+        self.__run_test(test='wilcoxon')
+    
     def GetResult(self):
-        return self.result
+        try:
+            return self.results
+        except AttributeError as error:
+            print(error)
+            return {}
     
     def GetSummary(self):
         return self.summary
@@ -319,12 +378,19 @@ class StatisticalAnalysis(__StatisticalTests, __NormalityTests, __TextFormatting
 
 # Example usage
 
-#data = [list(np.random.normal(i, 1, 100)) for i in range(3)]
+# data = [list(np.random.normal(i, 1, 100)) for i in range(3)]
+# data = [list(np.random.uniform(i, 1, 100)) for i in range(3)]
 
 new_csv = csv.OpenFile('data.csv')
-data = new_csv.Cols[2:4]
+data = new_csv.Cols[0:2]
 
 
-analysis = StatisticalAnalysis(data, paired=True, tails=1)
-result = analysis.GetResult()
+analysis = StatisticalAnalysis(data, paired=False, tails=2)
+analysis.RunAuto()
+# analysis.RunFriedman()
+# analysis.RunKruskalWallis()
+# analysis.RunMannWhitney()
+# analysis.RunTtest()
+# analysis.RunWilcoxon()
 
+results = analysis.GetResult()
