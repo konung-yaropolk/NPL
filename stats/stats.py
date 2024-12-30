@@ -1,6 +1,7 @@
-import SimpleCsv as csv
+import scsv as csv
 import numpy as np
-import scipy.stats as stats
+#import scipy.stats as stats
+from scipy.stats import ttest_rel,ttest_ind,ttest_1samp,wilcoxon,mannwhitneyu,f_oneway,kruskal,friedmanchisquare,shapiro,norm
 
 
 class __StatisticalTests():
@@ -9,7 +10,7 @@ class __StatisticalTests():
     '''
 
     def t_test_paired(self):
-        t_stat, t_p_value = stats.ttest_rel(
+        t_stat, t_p_value = ttest_rel(
             self.groups_list[0], self.groups_list[1])
 
         if self.tails == 1:
@@ -21,7 +22,7 @@ class __StatisticalTests():
         self.p_value = t_p_value
 
     def t_test_independend(self):
-        t_stat, t_p_value = stats.ttest_ind(
+        t_stat, t_p_value = ttest_ind(
             self.groups_list[0], self.groups_list[1])
 
         if self.tails == 1:
@@ -33,7 +34,7 @@ class __StatisticalTests():
         self.p_value = t_p_value
 
     def t_test_single_sample(self):
-        t_stat, t_p_value = stats.ttest_1samp(self.groups_list[0], self.popmean)
+        t_stat, t_p_value = ttest_1samp(self.groups_list[0], self.popmean)
         if self.tails == 1:
             t_p_value /= 2
 
@@ -44,7 +45,7 @@ class __StatisticalTests():
 
     def wilcoxon_single_sample(self):
         data = [i - self.popmean for i in self.groups_list[0]]
-        w_stat, w_p_value = stats.wilcoxon(data)
+        w_stat, w_p_value = wilcoxon(data)
         if self.tails == 1 and w_p_value > 0.5:
             w_p_value = 1 - w_p_value
 
@@ -54,7 +55,7 @@ class __StatisticalTests():
         self.p_value = w_p_value
 
     def mann_whitney_u_test(self):
-        stat, p_value = stats.mannwhitneyu(
+        stat, p_value = mannwhitneyu(
             self.groups_list[0], self.groups_list[1], alternative='two-sided' if self.tails == 2 else 'greater')
         self.test_name = 'Mann-Whitney U test'
         self.test_id = __name__
@@ -62,7 +63,7 @@ class __StatisticalTests():
         self.p_value = p_value
 
     def wilcoxon_signed_rank_test(self):
-        stat, p_value = stats.wilcoxon(self.groups_list[0], self.groups_list[1])
+        stat, p_value = wilcoxon(self.groups_list[0], self.groups_list[1])
         if self.tails == 1 and p_value > 0.5:
             p_value = 1 - p_value
         self.test_name = 'Wilcoxon signed-rank test'
@@ -71,7 +72,7 @@ class __StatisticalTests():
         self.p_value = p_value
 
     def anova(self):
-        stat, p_value = stats.f_oneway(*self.groups_list)
+        stat, p_value = f_oneway(*self.groups_list)
         if self.tails == 1 and p_value > 0.5:
             p_value /= 2
         self.test_name = 'ANOVA'
@@ -80,14 +81,14 @@ class __StatisticalTests():
         self.p_value = p_value
 
     def kruskal_wallis_test(self):
-        stat, p_value = stats.kruskal(*self.groups_list)
+        stat, p_value = kruskal(*self.groups_list)
         self.test_name = 'Kruskal-Wallis test'
         self.test_id = __name__
         self.test_stat = stat
         self.p_value = p_value
 
     def friedman_test(self):
-        stat, p_value = stats.friedmanchisquare(*self.groups_list)
+        stat, p_value = friedmanchisquare(*self.groups_list)
         self.test_name = 'Friedman test'
         self.test_id = __name__
         self.test_stat = stat
@@ -101,7 +102,7 @@ class __NormalityTests():
 
     def check_normality(self, data):
         # Shapiro-Wilk Test
-        sw_stat, sw_p_value = stats.shapiro(data)
+        sw_stat, sw_p_value = shapiro(data)
         if sw_p_value > 0.05:
             return True, 'Shapiro-Wilk'
 
@@ -118,7 +119,7 @@ class __NormalityTests():
         n = len(data)
         mean = np.mean(data)
         std = np.std(data, ddof=1)
-        cdf_values = stats.norm.cdf(data, loc=mean, scale=std)
+        cdf_values = norm.cdf(data, loc=mean, scale=std)
         empirical_cdf = np.arange(1, n + 1) / n
         D_plus = np.max(empirical_cdf - cdf_values)
         D_minus = np.max(cdf_values - (np.arange(n) / n))

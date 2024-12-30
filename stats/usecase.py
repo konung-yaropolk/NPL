@@ -1,4 +1,4 @@
-import SimpleCsv as SimpleCsv
+import scsv as scsv
 import statistics
 
 
