@@ -103,3 +103,6 @@ class OpenFile(__Transform_methods):
                 )
 
         return output
+    
+if __name__ == '__main__':
+    print('\nThis script can be used as an imported module only\n')
