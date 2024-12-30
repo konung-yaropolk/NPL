@@ -1,2 +1,3 @@
 numpy
 scsv
+PyQt6

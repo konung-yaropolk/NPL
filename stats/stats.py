@@ -11,86 +11,86 @@ class __StatisticalTests():
 
     def t_test_paired(self):
         t_stat, t_p_value = ttest_rel(
-            self.groups_list[0], self.groups_list[1])
+            self.data[0], self.data[1])
 
         if self.tails == 1:
             t_p_value /= 2
 
         self.test_name = 't-test paired'
-        self.test_id = __name__
+        self.test_id = 't_test_paired'
         self.test_stat = t_stat
         self.p_value = t_p_value
 
     def t_test_independend(self):
         t_stat, t_p_value = ttest_ind(
-            self.groups_list[0], self.groups_list[1])
+            self.data[0], self.data[1])
 
         if self.tails == 1:
             t_p_value /= 2
 
         self.test_name = 't-test independend'
-        self.test_id = __name__
+        self.test_id = 't_test_independend'
         self.test_stat = t_stat
         self.p_value = t_p_value
 
     def t_test_single_sample(self):
-        t_stat, t_p_value = ttest_1samp(self.groups_list[0], self.popmean)
+        t_stat, t_p_value = ttest_1samp(self.data[0], self.popmean)
         if self.tails == 1:
             t_p_value /= 2
 
         self.test_name = 'Single-sample t-test'
-        self.test_id = __name__
+        self.test_id = 't_test_single_sample'
         self.test_stat = t_stat
         self.p_value = t_p_value
 
     def wilcoxon_single_sample(self):
-        data = [i - self.popmean for i in self.groups_list[0]]
+        data = [i - self.popmean for i in self.data[0]]
         w_stat, w_p_value = wilcoxon(data)
         if self.tails == 1 and w_p_value > 0.5:
             w_p_value = 1 - w_p_value
 
         self.test_name = 'Wilcoxon signed-rank test for single sample'
-        self.test_id = __name__
+        self.test_id = 'wilcoxon_single_sample'
         self.test_stat = w_stat
         self.p_value = w_p_value
 
     def mann_whitney_u_test(self):
         stat, p_value = mannwhitneyu(
-            self.groups_list[0], self.groups_list[1], alternative='two-sided' if self.tails == 2 else 'greater')
+            self.data[0], self.data[1], alternative='two-sided' if self.tails == 2 else 'greater')
         self.test_name = 'Mann-Whitney U test'
-        self.test_id = __name__
+        self.test_id = 'mann_whitney_u_test'
         self.test_stat = stat
         self.p_value = p_value
 
     def wilcoxon_signed_rank_test(self):
-        stat, p_value = wilcoxon(self.groups_list[0], self.groups_list[1])
+        stat, p_value = wilcoxon(self.data[0], self.data[1])
         if self.tails == 1 and p_value > 0.5:
             p_value = 1 - p_value
         self.test_name = 'Wilcoxon signed-rank test'
-        self.test_id = __name__
+        self.test_id = 'wilcoxon_signed_rank_test'
         self.test_stat = stat
         self.p_value = p_value
 
     def anova(self):
-        stat, p_value = f_oneway(*self.groups_list)
+        stat, p_value = f_oneway(*self.data)
         if self.tails == 1 and p_value > 0.5:
             p_value /= 2
         self.test_name = 'ANOVA'
-        self.test_id = __name__
+        self.test_id = 'anova'
         self.test_stat = stat
         self.p_value = p_value
 
     def kruskal_wallis_test(self):
-        stat, p_value = kruskal(*self.groups_list)
+        stat, p_value = kruskal(*self.data)
         self.test_name = 'Kruskal-Wallis test'
-        self.test_id = __name__
+        self.test_id = 'kruskal_wallis_test'
         self.test_stat = stat
         self.p_value = p_value
 
     def friedman_test(self):
-        stat, p_value = friedmanchisquare(*self.groups_list)
+        stat, p_value = friedmanchisquare(*self.data)
         self.test_name = 'Friedman test'
-        self.test_id = __name__
+        self.test_id = 'friedman_test'
         self.test_stat = stat
         self.p_value = p_value
 
@@ -150,7 +150,7 @@ class __TextFormatting():
     def print_groups(self, delimiter='                ', max_length=15):
         self.log('')
         # Get the number of groups (rows) and the maximum length of rows
-        data = self.groups_list
+        data = self.data
         num_groups = len(data)
         max_len = max(len(row) for row in data)
         
@@ -230,7 +230,7 @@ class __TextFormatting():
             'Test_Name': self.test_name,
             'N_Groups': self.n_groups,
             'Population_Mean' : self.popmean if self.n_groups == 1 else 'NaN',
-            'Group_Size': [len(self.groups_list[i]) for i in range(len(self.groups_list))],
+            'Group_Size': [len(self.data[i]) for i in range(len(self.data))],
             'Data_Normaly_Distributed': self.parametric,
             'Parametric_Test_Applied': True if self.test_id in self.parametric_tests_ids else False,
             'Paired_Test_Applied': self.paired,
@@ -278,13 +278,11 @@ class StatisticalAnalysis(__StatisticalTests, __NormalityTests, __TextFormatting
         self.tails = tails
         self.popmean = popmean
         self.n_groups = len(self.groups_list)
-        # self.__run_test(test)
-        # print(self.groups_list)
         self.warning_flag_non_numeric_data = False
         self.parametric_tests_ids = ['t_test_independend',
                                      't_test_paired',
                                      't_test_single_sample',
-                                      'anova']
+                                     'anova']
 
     def __run_test(self, test='auto'):
 
@@ -303,7 +301,7 @@ class StatisticalAnalysis(__StatisticalTests, __NormalityTests, __TextFormatting
         self.log('Statistics module initiated for data of {} groups\n'.format(len(self.groups_list)))
 
         # adjusting input data type
-        self.groups_list = self.floatify_recursive(self.groups_list)
+        self.data = self.floatify_recursive(self.groups_list)
         if self.warning_flag_non_numeric_data:
             self.log('\nWarnig: Non-numeric data was found in input and ignored.\n        Make sure the input data is correct to get the correct results\n', warning=True)
 
@@ -314,15 +312,15 @@ class StatisticalAnalysis(__StatisticalTests, __NormalityTests, __TextFormatting
                 and (test == 't_test_single_sample' 
                 or test == 'wilcoxon_single_sample')), 'Only one group of data must be given for single-group tests'
             assert all(len(
-                lst) > 2 for lst in self.groups_list), 'Each group must contain at least three values'            
+                lst) > 2 for lst in self.data), 'Each group must contain at least three values'            
             assert not (self.paired == True and not all(len(lst) == len(
-                    self.groups_list[0]) for lst in self.groups_list)), 'Paired groups must be the same length'
+                    self.data[0]) for lst in self.data)), 'Paired groups must be the same length'
             assert not (test == 'friedman' and not all(len(lst) == len(
-                    self.groups_list[0]) for lst in self.groups_list)), 'Paired groups must be the same length for Friedman Chi Square test' 
+                    self.data[0]) for lst in self.data)), 'Paired groups must be the same length for Friedman Chi Square test' 
             assert not (test == 't_test_paired' and not all(len(lst) == len(
-                    self.groups_list[0]) for lst in self.groups_list)), 'Paired groups must be the same length for Paired t-test'                          
+                    self.data[0]) for lst in self.data)), 'Paired groups must be the same length for Paired t-test'                          
             assert not (test == 'wilcoxon' and not all(len(lst) == len(
-                    self.groups_list[0]) for lst in self.groups_list)), 'Paired groups must be the same length for Wilcoxon signed-rank test'     
+                    self.data[0]) for lst in self.data)), 'Paired groups must be the same length for Wilcoxon signed-rank test'     
             assert not (test == 'friedman' and self.n_groups < 3), 'At least three groups of data must be given for 3-groups tests'
             assert not ((test == 'anova'  
                          or test == 'kruskal_wallis') and self.n_groups < 2), 'At least two groups of data must be given for ANOVA or Kruskal Wallis tests'
@@ -343,7 +341,7 @@ class StatisticalAnalysis(__StatisticalTests, __NormalityTests, __TextFormatting
         # Normality tests
         self.log('\n\nNormality checked by both Shapiro-Wilk and Lilliefors tests')
         self.log('Group data is normal if at least one results is positive:\n')
-        for i, data in enumerate(self.groups_list):
+        for i, data in enumerate(self.data):
             normal, method = self.check_normality(data)
             self.normals.append(normal)
             self.methods.append(method)
@@ -358,10 +356,10 @@ class StatisticalAnalysis(__StatisticalTests, __NormalityTests, __TextFormatting
         self.log('Test chosen by user:          ', test)
 
         # Wrong test Warnings
-        if not self.parametric and test in self.parametric_tests_ids:
+        if not test=='auto' and not self.parametric and test in self.parametric_tests_ids:
                 self.log('\nWarnig: Parametric test was manualy chosen for Not-Normaly distributed data.\n        The results might be skewed. \n        Please, run non-parametric test or preform automatic test selection.\n', warning=True)
 
-        if  self.parametric and not test in self.parametric_tests_ids:
+        if not test=='auto' and self.parametric and not test in self.parametric_tests_ids:
                 self.log('\nWarnig: Non-Parametric test was manualy chosen for Normaly distributed data.\n        The results might be skewed. \n        Please, run parametric test or preform automatic test selection.\n', warning=True)
 
         if test == 'anova':
@@ -479,35 +477,35 @@ class StatisticalAnalysis(__StatisticalTests, __NormalityTests, __TextFormatting
 # data = [list(np.random.normal(i, 1, 100)) for i in range(3)]
 # data = [list(np.random.uniform(i, 1, 100)) for i in range(3)]
 
-new_csv = csv.OpenFile('data.csv')
-data = new_csv.Cols[0:2]
+# new_csv = csv.OpenFile('data.csv')
+# data = new_csv.Cols[2:4]
 
 
-analysis = StatisticalAnalysis(data, paired=False, tails=2, popmean=-1.1)
+# analysis = StatisticalAnalysis(data, paired=False, tails=2, popmean=-1.1)
 
-analysis.RunAuto()
+# analysis.RunAuto()
 
-# 2 groups independend:
-analysis.RunTtest()
-analysis.RunMannWhitney()
+# # 2 groups independend:
+# analysis.RunTtest()
+# analysis.RunMannWhitney()
 
-# 2 groups paired
-analysis.RunTtestPaired()
-analysis.RunWilcoxon()
+# # 2 groups paired
+# analysis.RunTtestPaired()
+# analysis.RunWilcoxon()
 
-# 3 and more indepennded groups comparison:
-analysis.RunAnova()
-analysis.RunKruskalWallis()
+# # 3 and more indepennded groups comparison:
+# analysis.RunAnova()
+# analysis.RunKruskalWallis()
 
-# 3 and more paired groups comparison:
-analysis.RunFriedman()
+# # 3 and more paired groups comparison:
+# analysis.RunFriedman()
 
-# single group test
-analysis.RunTtestSingleSample()
-analysis.RunWilcoxonSingleSample()
+# # single group test
+# analysis.RunTtestSingleSample()
+# analysis.RunWilcoxonSingleSample()
 
 
-results = analysis.GetResult()
+# results = analysis.GetResult()
 
 
 # if __name__ == '__main__':
