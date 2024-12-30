@@ -22,7 +22,7 @@
      <widget class="QTextEdit" name="result_display">
       <property name="font">
        <font>
-        <family>Cascadia Mono</family>
+        <family>Consolas</family>
         <pointsize>7</pointsize>
        </font>
       </property>
