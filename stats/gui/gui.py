@@ -39,8 +39,8 @@ class MainWindow(QMainWindow):
         self.runAutoButton = self.ui.runAutoButton
         self.runButton = self.ui.runButton
         self.dependendGroups = self.ui.dependendGroups
-        self.oneTail = self.ui.oneTail
-        self.twoTail = self.ui.twoTail
+        self.oneTailed = self.ui.oneTailed
+        self.twoTailed = self.ui.twoTailed
         self.popMean = self.ui.popMean
         self.t_test_single_sample = self.ui.t_test_single_sample
         self.wilcoxon_single_sample = self.ui.wilcoxon_single_sample
@@ -52,6 +52,7 @@ class MainWindow(QMainWindow):
         self.anova = self.ui.anova
         self.kruskal_wallis = self.ui.kruskal_wallis
         self.dependendGroups = self.ui.dependendGroups
+        self.errorMsg = self.ui.errorMsg
 
         # Connect button to function
         self.runAutoButton.clicked.connect(self.runAuto)
@@ -67,60 +68,68 @@ class MainWindow(QMainWindow):
         return [[element for element in row if element is not None] for row in transposed]
 
     def runAuto(self):
+        self.errorMsg.setText('')
         data_text = self.input_field.toPlainText()
         try:
             groups_list = self.listify_text(data_text)
             analysis = stats.StatisticalAnalysis(
                 groups_list,
                 paired=self.dependendGroups.isChecked(),
-                tails=2 if self.twoTail.isChecked() else 1,
+                tails=2 if self.twoTailed.isChecked() else 1,
                 popmean=float(self.popMean.text()))
             analysis.RunAuto()
             result = analysis.GetSummary()
             self.result_display.setPlainText(result)
         except Exception as e:
+            e = 'Error: \n'+ str(e)
             print(e)
-            QMessageBox.critical(self, "Error", str(e))
+            self.errorMsg.setText(e)
+            #QMessageBox.critical(self, "Error", str(e))
 
     def runManual(self):
+        self.errorMsg.setText('')
         data_text = self.input_field.toPlainText()
-        # try:
-        groups_list = self.listify_text(data_text)
-        analysis = stats.StatisticalAnalysis(
-            groups_list,
-            paired=self.dependendGroups.isChecked(),
-            tails=2 if self.twoTail.isChecked() else 1,
-            popmean=float(self.popMean.text()))
+        try:
+            groups_list = self.listify_text(data_text)
+            analysis = stats.StatisticalAnalysis(
+                groups_list,
+                paired=self.dependendGroups.isChecked(),
+                tails=2 if self.twoTailed.isChecked() else 1,
+                popmean=float(self.popMean.text()))
 
-        checkbuttons_state_list = [
-            self.anova.isChecked(),
-            self.friedman.isChecked(),
-            self.kruskal_wallis.isChecked(),
-            self.mann_whitney.isChecked(),
-            self.t_test_independend.isChecked(),
-            self.t_test_paired.isChecked(),
-            self.t_test_single_sample.isChecked(),
-            self.wilcoxon_single_sample.isChecked(),
-            self.wilcoxon.isChecked(),
-        ]
+            checkbuttons_state_list = [
+                self.anova.isChecked(),
+                self.friedman.isChecked(),
+                self.kruskal_wallis.isChecked(),
+                self.mann_whitney.isChecked(),
+                self.t_test_independend.isChecked(),
+                self.t_test_paired.isChecked(),
+                self.t_test_single_sample.isChecked(),
+                self.wilcoxon_single_sample.isChecked(),
+                self.wilcoxon.isChecked(),
+            ]
 
-        checked_test_ids = []
-        for i in range(len(analysis.all_test_ids)):
-            if checkbuttons_state_list[i]:
-                checked_test_ids.append(analysis.all_test_ids[i])
+            checked_test_ids = []
+            for i in range(len(analysis.all_test_ids)):
+                if checkbuttons_state_list[i]:
+                    checked_test_ids.append(analysis.all_test_ids[i])
 
-        for test_id in checked_test_ids:
-            analysis.RunManual(test_id)
+            for test_id in checked_test_ids:
+                analysis.RunManual(test_id)
 
-        result = analysis.GetSummary()
-        self.result_display.setPlainText(result)
-        # except Exception as e:
-        #     print(e)
-        #     QMessageBox.critical(self, "Error", str(e))
+            result = analysis.GetSummary()
+            self.result_display.setPlainText(result)
+        except Exception as e:
+            e = 'Error: \n'+ str(e)
+            print(e)
+            self.errorMsg.setText(e)
+            #QMessageBox.critical(self, "Error", str(e))
 
 
 if __name__ == '__main__':
+    import pyi_splash
     app = QApplication(sys.argv)
     main_window = MainWindow()
     main_window.show()
+    pyi_splash.close()
     sys.exit(app.exec())

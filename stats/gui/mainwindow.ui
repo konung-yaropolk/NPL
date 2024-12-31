@@ -194,8 +194,8 @@ p, li { white-space: pre-wrap; }
         <widget class="QGroupBox" name="groupBox">
          <property name="geometry">
           <rect>
-           <x>0</x>
-           <y>500</y>
+           <x>10</x>
+           <y>450</y>
            <width>221</width>
            <height>151</height>
           </rect>
@@ -231,7 +231,7 @@ p, li { white-space: pre-wrap; }
           <property name="title">
            <string>Hypothesis Direction:</string>
           </property>
-          <widget class="QRadioButton" name="oneTail">
+          <widget class="QRadioButton" name="oneTailed">
            <property name="geometry">
             <rect>
              <x>10</x>
@@ -241,10 +241,10 @@ p, li { white-space: pre-wrap; }
             </rect>
            </property>
            <property name="text">
-            <string>One-Tail</string>
+            <string>One-Tailed</string>
            </property>
           </widget>
-          <widget class="QRadioButton" name="twoTail">
+          <widget class="QRadioButton" name="twoTailed">
            <property name="geometry">
             <rect>
              <x>10</x>
@@ -254,7 +254,7 @@ p, li { white-space: pre-wrap; }
             </rect>
            </property>
            <property name="text">
-            <string>Two-Tail</string>
+            <string>Two-Tailed</string>
            </property>
            <property name="checked">
             <bool>true</bool>
@@ -372,6 +372,30 @@ p, li { white-space: pre-wrap; }
            </property>
           </widget>
          </widget>
+        </widget>
+        <widget class="QLabel" name="errorMsg">
+         <property name="geometry">
+          <rect>
+           <x>10</x>
+           <y>600</y>
+           <width>201</width>
+           <height>41</height>
+          </rect>
+         </property>
+         <property name="font">
+          <font>
+           <pointsize>7</pointsize>
+          </font>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">color: 'red'</string>
+         </property>
+         <property name="text">
+          <string/>
+         </property>
+         <property name="indent">
+          <number>-1</number>
+         </property>
         </widget>
        </widget>
       </item>

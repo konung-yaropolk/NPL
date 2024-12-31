@@ -13,6 +13,8 @@ class __StatisticalTests():
         stat, p_value = f_oneway(*self.data)
         if self.tails == 1 and p_value > 0.5:
             p_value /= 2
+        # if self.tails == 1:
+        #     p_value /= 2
         self.test_name = 'ANOVA'
         self.test_id = 'anova'
         self.paired = False
@@ -38,6 +40,8 @@ class __StatisticalTests():
     def mann_whitney_u_test(self):
         stat, p_value = mannwhitneyu(
             self.data[0], self.data[1], alternative='two-sided' if self.tails == 2 else 'greater')
+        # if self.tails == 1:
+        #     p_value /= 2
         self.test_name = 'Mann-Whitney U test'
         self.test_id = 'mann_whitney'
         self.paired = False
@@ -90,8 +94,8 @@ class __StatisticalTests():
             self.AddWarning('no_pop_mean_setup')
         data = [i - self.popmean for i in self.data[0]]
         w_stat, w_p_value = wilcoxon(data)
-        if self.tails == 1 and w_p_value > 0.5:
-            w_p_value = 1 - w_p_value
+        if self.tails == 1:
+            p_value /= 2
 
         self.test_name = 'Wilcoxon signed-rank test for single sample'
         self.test_id = 'wilcoxon_single_sample'
@@ -101,8 +105,8 @@ class __StatisticalTests():
 
     def wilcoxon(self):
         stat, p_value = wilcoxon(self.data[0], self.data[1])
-        if self.tails == 1 and p_value > 0.5:
-            p_value = 1 - p_value
+        if self.tails == 1:
+            p_value /= 2
         self.test_name = 'Wilcoxon signed-rank test'
         self.test_id = 'wilcoxon'
         self.paired = True
@@ -512,7 +516,7 @@ class StatisticalAnalysis(__StatisticalTests, __NormalityTests, __TextFormatting
 # data = [list(np.random.uniform(i, 1, 100)) for i in range(3)]
 
 # new_csv = csv.OpenFile('data.csv')
-# data = new_csv.Cols[2:3]
+# data = new_csv.Cols[2:4]
 
 
 # analysis = StatisticalAnalysis(data, paired=False, tails=2, popmean=0)
