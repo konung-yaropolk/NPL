@@ -9,17 +9,40 @@ class __StatisticalTests():
         Statistical tests mixin
     '''
 
-    def t_test_paired(self):
-        t_stat, t_p_value = ttest_rel(
-            self.data[0], self.data[1])
+    def anova(self):
+        stat, p_value = f_oneway(*self.data)
+        if self.tails == 1 and p_value > 0.5:
+            p_value /= 2
+        self.test_name = 'ANOVA'
+        self.test_id = 'anova'
+        self.paired = False
+        self.test_stat = stat
+        self.p_value = p_value
 
-        if self.tails == 1:
-            t_p_value /= 2
+    def friedman_test(self):
+        stat, p_value = friedmanchisquare(*self.data)
+        self.test_name = 'Friedman test'
+        self.test_id = 'friedman'
+        self.paired = True
+        self.test_stat = stat
+        self.p_value = p_value
 
-        self.test_name = 't-test for paired samples'
-        self.test_id = 't_test_paired'
-        self.test_stat = t_stat
-        self.p_value = t_p_value
+    def kruskal_wallis_test(self):
+        stat, p_value = kruskal(*self.data)
+        self.test_name = 'Kruskal-Wallis test'
+        self.test_id = 'kruskal_wallis'
+        self.paired = False
+        self.test_stat = stat
+        self.p_value = p_value
+
+    def mann_whitney_u_test(self):
+        stat, p_value = mannwhitneyu(
+            self.data[0], self.data[1], alternative='two-sided' if self.tails == 2 else 'greater')
+        self.test_name = 'Mann-Whitney U test'
+        self.test_id = 'mann_whitney'
+        self.paired = False
+        self.test_stat = stat
+        self.p_value = p_value
 
     def t_test_independend(self):
         t_stat, t_p_value = ttest_ind(
@@ -30,20 +53,41 @@ class __StatisticalTests():
 
         self.test_name = 't-test for independend samples'
         self.test_id = 't_test_independend'
+        self.paired = False
+        self.test_stat = t_stat
+        self.p_value = t_p_value
+
+    def t_test_paired(self):
+        t_stat, t_p_value = ttest_rel(
+            self.data[0], self.data[1])
+
+        if self.tails == 1:
+            t_p_value /= 2
+
+        self.test_name = 't-test for paired samples'
+        self.test_id = 't_test_paired'
+        self.paired = True
         self.test_stat = t_stat
         self.p_value = t_p_value
 
     def t_test_single_sample(self):
+        if self.popmean == None:
+            self.popmean = 0
+            self.AddWarning('no_pop_mean_setup')
         t_stat, t_p_value = ttest_1samp(self.data[0], self.popmean)
         if self.tails == 1:
             t_p_value /= 2
 
         self.test_name = 'Single-sample t-test'
         self.test_id = 't_test_single_sample'
+        self.paired = False
         self.test_stat = t_stat
         self.p_value = t_p_value
 
     def wilcoxon_single_sample(self):
+        if self.popmean == None:
+            self.popmean = 0
+            self.AddWarning('no_pop_mean_setup')
         data = [i - self.popmean for i in self.data[0]]
         w_stat, w_p_value = wilcoxon(data)
         if self.tails == 1 and w_p_value > 0.5:
@@ -51,46 +95,17 @@ class __StatisticalTests():
 
         self.test_name = 'Wilcoxon signed-rank test for single sample'
         self.test_id = 'wilcoxon_single_sample'
+        self.paired = False
         self.test_stat = w_stat
         self.p_value = w_p_value
 
-    def mann_whitney_u_test(self):
-        stat, p_value = mannwhitneyu(
-            self.data[0], self.data[1], alternative='two-sided' if self.tails == 2 else 'greater')
-        self.test_name = 'Mann-Whitney U test'
-        self.test_id = 'mann_whitney_u_test'
-        self.test_stat = stat
-        self.p_value = p_value
-
-    def wilcoxon_signed_rank_test(self):
+    def wilcoxon(self):
         stat, p_value = wilcoxon(self.data[0], self.data[1])
         if self.tails == 1 and p_value > 0.5:
             p_value = 1 - p_value
         self.test_name = 'Wilcoxon signed-rank test'
-        self.test_id = 'wilcoxon_signed_rank_test'
-        self.test_stat = stat
-        self.p_value = p_value
-
-    def anova(self):
-        stat, p_value = f_oneway(*self.data)
-        if self.tails == 1 and p_value > 0.5:
-            p_value /= 2
-        self.test_name = 'ANOVA'
-        self.test_id = 'anova'
-        self.test_stat = stat
-        self.p_value = p_value
-
-    def kruskal_wallis_test(self):
-        stat, p_value = kruskal(*self.data)
-        self.test_name = 'Kruskal-Wallis test'
-        self.test_id = 'kruskal_wallis_test'
-        self.test_stat = stat
-        self.p_value = p_value
-
-    def friedman_test(self):
-        stat, p_value = friedmanchisquare(*self.data)
-        self.test_name = 'Friedman test'
-        self.test_id = 'friedman_test'
+        self.test_id = 'wilcoxon'
+        self.paired = True
         self.test_stat = stat
         self.p_value = p_value
 
@@ -156,8 +171,7 @@ class __TextFormatting():
 
         # Print the header
         header = [f'Group {i+1}' for i in range(num_groups)]
-        space = [' '*7 for i in range(num_groups)]
-        line = ['_'*7 for i in range(num_groups)]
+        space = [' '*7]  # for i in range(num_groups)]
         self.log(delimiter.join(header))
         self.log(delimiter.join(space))
 
@@ -184,12 +198,6 @@ class __TextFormatting():
             if all_values_empty:
                 break
             self.log(delimiter.join(row_values))
-
-    def print_results(self):
-        self.log('\n\nResults: \n')
-        for i in self.results:
-            shift = 27 - len(i)
-            self.log(i, ':', ' ' * shift, self.results[i])
 
     def make_stars(self):
         if self.p_value is not None:
@@ -220,6 +228,15 @@ class __TextFormatting():
                 return 'p < 0.0001'
         return 'NaN'
 
+    def print_results(self):
+        self.log('\n\nResults: \n')
+        for i in self.results:
+            shift = 27 - len(i)
+            if i == 'Warnings':
+                self.log(i, ':', ' ' * shift, len(self.results[i]))
+            else:
+                self.log(i, ':', ' ' * shift, self.results[i])
+
     def create_results_dict(self):
 
         self.stars_int = self.make_stars()
@@ -227,6 +244,7 @@ class __TextFormatting():
 
         return {
             'p-value': self.make_p_value_printed(),
+            'Significance(p<0.05)':  True if self.p_value.item() < 0.05 else False,
             'Stars_Printed': self.stars_str,
             'Test_Name': self.test_name,
             'N_Groups': self.n_groups,
@@ -242,12 +260,21 @@ class __TextFormatting():
             'Warnings': self.warnings,
         }
 
-    def log(self, *args, warning=False, **kwargs):
+    def log(self, *args, **kwargs):
         message = ' '.join(map(str, args))
         print(message, **kwargs)
         self.summary += '\n    ' + message
-        if warning:
-            self.warnings.append(message)
+
+    def AddWarning(self, warning_id):
+        warnings = {
+            'not-numeric':                     '\nWarnig: Non-numeric data was found in input and ignored.\n        Make sure the input data is correct to get the correct results\n',
+            'param_test_with_non-normal_data': '\nWarnig: Parametric test was manualy chosen for Not-Normaly distributed data.\n        The results might be skewed. \n        Please, run non-parametric test or preform automatic test selection.\n',
+            'non-param_test_with_normal_data': '\nWarnig: Non-Parametric test was manualy chosen for Normaly distributed data.\n        The results might be skewed. \n        Please, run parametric test or preform automatic test selection.\n',
+            'no_pop_mean_setup':               '\nWarnig: No Population Mean was set up for single-sample test, used default 0 value.\n        The results might be skewed. \n        Please, set the Population Mean and run the test again.\n',
+        }
+        message = warnings[warning_id]
+        self.log(message)
+        self.warnings.append(message)
 
 
 class __InputFormatting():
@@ -280,17 +307,28 @@ class StatisticalAnalysis(__StatisticalTests, __NormalityTests, __TextFormatting
         self.popmean = popmean
         self.n_groups = len(self.groups_list)
         self.warning_flag_non_numeric_data = False
+        self.summary = ''
         self.parametric_tests_ids = ['t_test_independend',
                                      't_test_paired',
                                      't_test_single_sample',
                                      'anova']
+        self.all_test_ids = [  # in aplhabetical orded:
+            'anova',
+            'friedman',
+            'kruskal_wallis',
+            'mann_whitney',
+            't_test_independend',
+            't_test_paired',
+            't_test_single_sample',
+            'wilcoxon_single_sample',
+            'wilcoxon',
+        ]
 
     def __run_test(self, test='auto'):
 
         # reset values from previous tests
         self.results = {}
         self.warnings = []
-        self.summary = ''
         self.normals = []
         self.methods = []
         self.test_name = None
@@ -305,7 +343,7 @@ class StatisticalAnalysis(__StatisticalTests, __NormalityTests, __TextFormatting
         # adjusting input data type
         self.data = self.floatify_recursive(self.groups_list)
         if self.warning_flag_non_numeric_data:
-            self.log('\nWarnig: Non-numeric data was found in input and ignored.\n        Make sure the input data is correct to get the correct results\n', warning=True)
+            self.AddWarning('not-numeric')
 
         # Assertion block
         try:
@@ -361,10 +399,9 @@ class StatisticalAnalysis(__StatisticalTests, __NormalityTests, __TextFormatting
 
         # Wrong test Warnings
         if not test == 'auto' and not self.parametric and test in self.parametric_tests_ids:
-            self.log('\nWarnig: Parametric test was manualy chosen for Not-Normaly distributed data.\n        The results might be skewed. \n        Please, run non-parametric test or preform automatic test selection.\n', warning=True)
-
+            self.AddWarning('param_test_with_non-normal_data')
         if not test == 'auto' and self.parametric and not test in self.parametric_tests_ids:
-            self.log('\nWarnig: Non-Parametric test was manualy chosen for Normaly distributed data.\n        The results might be skewed. \n        Please, run parametric test or preform automatic test selection.\n', warning=True)
+            self.AddWarning('non-param_test_with_normal_data')
 
         if test == 'anova':
             self.anova()
@@ -383,7 +420,7 @@ class StatisticalAnalysis(__StatisticalTests, __NormalityTests, __TextFormatting
         elif test == 'wilcoxon_single_sample':
             self.wilcoxon_single_sample()
         elif test == 'wilcoxon':
-            self.wilcoxon_signed_rank_test()
+            self.wilcoxon()
         else:
             self.log('Automatic test selection preformed.')
             self.__auto()
@@ -402,7 +439,7 @@ class StatisticalAnalysis(__StatisticalTests, __NormalityTests, __TextFormatting
                 if self.parametric:
                     return self.t_test_paired()
                 else:
-                    return self.wilcoxon_signed_rank_test()
+                    return self.wilcoxon()
             else:
                 if self.parametric:
                     return self.t_test_independend()
@@ -425,40 +462,34 @@ class StatisticalAnalysis(__StatisticalTests, __NormalityTests, __TextFormatting
     def RunAuto(self):
         self.__run_test(test='auto')
 
+    def RunManual(self, test):
+        self.__run_test(test)
+
     def RunAnova(self):
-        self.paired = False
         self.__run_test(test='anova')
 
     def RunFriedman(self):
-        self.paired = True
         self.__run_test(test='friedman')
 
     def RunKruskalWallis(self):
-        self.paired = False
         self.__run_test(test='kruskal_wallis')
 
     def RunMannWhitney(self):
-        self.paired = False
         self.__run_test(test='mann_whitney')
 
     def RunTtest(self):
-        self.paired = False
         self.__run_test(test='t_test_independend')
 
     def RunTtestPaired(self):
-        self.paired = True
         self.__run_test(test='t_test_paired')
 
     def RunTtestSingleSample(self):
-        self.paired = False
         self.__run_test(test='t_test_single_sample')
 
     def RunWilcoxonSingleSample(self):
-        self.paired = False
         self.__run_test(test='wilcoxon_single_sample')
 
     def RunWilcoxon(self):
-        self.paired = True
         self.__run_test(test='wilcoxon')
 
     def GetResult(self):
@@ -481,10 +512,10 @@ class StatisticalAnalysis(__StatisticalTests, __NormalityTests, __TextFormatting
 # data = [list(np.random.uniform(i, 1, 100)) for i in range(3)]
 
 # new_csv = csv.OpenFile('data.csv')
-# data = new_csv.Cols[2:4]
+# data = new_csv.Cols[2:3]
 
 
-# analysis = StatisticalAnalysis(data, paired=False, tails=2, popmean=-1.1)
+# analysis = StatisticalAnalysis(data, paired=False, tails=2, popmean=0)
 
 # analysis.RunAuto()
 
