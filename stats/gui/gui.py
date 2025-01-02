@@ -126,9 +126,9 @@ class MainWindow(QMainWindow):
 
 
 if __name__ == '__main__':
-    import pyi_splash
+    # import pyi_splash
     app = QApplication(sys.argv)
     main_window = MainWindow()
     main_window.show()
-    pyi_splash.close()
+    # pyi_splash.close()
     sys.exit(app.exec())

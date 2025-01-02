@@ -198,8 +198,8 @@ p, li { white-space: pre-wrap; }
         <widget class="QGroupBox" name="groupBox">
          <property name="geometry">
           <rect>
-           <x>10</x>
-           <y>450</y>
+           <x>0</x>
+           <y>460</y>
            <width>221</width>
            <height>151</height>
           </rect>

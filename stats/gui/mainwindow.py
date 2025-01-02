@@ -69,7 +69,7 @@ class Ui_MainWindow(object):
         self.t_test_independend.setGeometry(QtCore.QRect(10, 20, 161, 20))
         self.t_test_independend.setObjectName("t_test_independend")
         self.groupBox = QtWidgets.QGroupBox(parent=self.groupBox_2)
-        self.groupBox.setGeometry(QtCore.QRect(10, 450, 221, 151))
+        self.groupBox.setGeometry(QtCore.QRect(0, 460, 221, 151))
         self.groupBox.setFlat(False)
         self.groupBox.setObjectName("groupBox")
         self.dependendGroups = QtWidgets.QCheckBox(parent=self.groupBox)

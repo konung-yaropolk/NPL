@@ -166,21 +166,30 @@ class __TextFormatting():
         Text formatting mixin
     '''
 
-    def print_groups(self, delimiter='                ', max_length=15):
+    def autospace(self, elements_list, space, delimiter=' ') -> str:
+        output = ''
+        for i, element in enumerate(elements_list):
+            if i == len(elements_list):
+                output += element
+            else:
+                output += element + (space-len(element))*delimiter
+        return output
+
+    def print_groups(self, space=16, max_length=15):
         self.log('')
         # Get the number of groups (rows) and the maximum length of rows
         data = self.data
         num_groups = len(data)
-        max_len = max(len(row) for row in data)
+        group_longest = max(len(row) for row in data)
 
         # Print the header
         header = [f'Group {i+1}' for i in range(num_groups)]
-        space = [' '*7]  # for i in range(num_groups)]
-        self.log(delimiter.join(header))
-        self.log(delimiter.join(space))
+        line = [''*7]
+        self.log(self.autospace(header, space))
+        self.log(self.autospace(line, space))
 
         # Print each column with a placeholder if longer than max_length
-        for i in range(max_len):
+        for i in range(group_longest):
             row_values = []
             all_values_empty = True
             for row in data:
@@ -201,9 +210,9 @@ class __TextFormatting():
                         row_values.append('')
             if all_values_empty:
                 break
-            self.log(delimiter.join(row_values))
+            self.log(self.autospace(row_values, space))
 
-    def make_stars(self):
+    def make_stars(self) -> int:
         if self.p_value is not None:
             if self.p_value < 0.0001:
                 return 4
@@ -217,7 +226,7 @@ class __TextFormatting():
                 return 0
         return 0
 
-    def make_p_value_printed(self):
+    def make_p_value_printed(self) -> str:
         p = self.p_value.item()
         if p is not None:
             if p > 0.99:
@@ -241,7 +250,7 @@ class __TextFormatting():
             else:
                 self.log(i, ':', ' ' * shift, self.results[i])
 
-    def create_results_dict(self):
+    def create_results_dict(self) -> dict:
 
         self.stars_int = self.make_stars()
         self.stars_str = '*' * self.stars_int if self.stars_int else 'ns'
@@ -350,8 +359,8 @@ class StatisticalAnalysis(__StatisticalTests, __NormalityTests, __TextFormatting
             self.AddWarning('not-numeric')
 
         # Assertion block
-        try:   
-            assert self.tails in [1, 2], 'Tails parameter can be 1 or 2 only'    
+        try:
+            assert self.tails in [1, 2], 'Tails parameter can be 1 or 2 only'
             assert not (self.n_groups > 1
                         and (test == 't_test_single_sample'
                              or test == 'wilcoxon_single_sample')), 'Only one group of data must be given for single-group tests'
@@ -546,5 +555,5 @@ class StatisticalAnalysis(__StatisticalTests, __NormalityTests, __TextFormatting
 # results = analysis.GetResult()
 
 
-# if __name__ == '__main__':
-#     print('\nThis script can be used as an imported module only\n')
+if __name__ == '__main__':
+    print('\nThis script can be used as an imported module only\n')
