@@ -2,7 +2,6 @@ import sys
 from PyQt6 import uic
 from PyQt6.QtWidgets import QApplication, QMainWindow, QMessageBox, QTextEdit, QPushButton, QPlainTextEdit
 
-# Replace 'your_module' with the actual module name where your StatisticalAnalysis class is defined
 import stats
 from mainwindow import Ui_MainWindow
 
@@ -81,10 +80,10 @@ class MainWindow(QMainWindow):
             result = analysis.GetSummary()
             self.result_display.setPlainText(result)
         except Exception as e:
-            e = 'Error: \n'+ str(e)
+            e = 'Error: \n' + str(e)
             print(e)
             self.errorMsg.setText(e)
-            #QMessageBox.critical(self, "Error", str(e))
+            # QMessageBox.critical(self, "Error", str(e))
 
     def runManual(self):
         self.errorMsg.setText('')
@@ -120,10 +119,10 @@ class MainWindow(QMainWindow):
             result = analysis.GetSummary()
             self.result_display.setPlainText(result)
         except Exception as e:
-            e = 'Error: \n'+ str(e)
+            e = 'Error: \n' + str(e)
             print(e)
             self.errorMsg.setText(e)
-            #QMessageBox.critical(self, "Error", str(e))
+            # QMessageBox.critical(self, "Error", str(e))
 
 
 if __name__ == '__main__':

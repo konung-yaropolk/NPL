@@ -350,9 +350,9 @@ class StatisticalAnalysis(__StatisticalTests, __NormalityTests, __TextFormatting
             self.AddWarning('not-numeric')
 
         # Assertion block
-        try:
-            assert self.tails in [1, 2], 'Tails parameter can be 1 or 2 only'
-            assert not (self.n_groups != 1
+        try:   
+            assert self.tails in [1, 2], 'Tails parameter can be 1 or 2 only'       
+            assert not (self.n_groups > 1
                         and (test == 't_test_single_sample'
                              or test == 'wilcoxon_single_sample')), 'Only one group of data must be given for single-group tests'
             assert all(len(
