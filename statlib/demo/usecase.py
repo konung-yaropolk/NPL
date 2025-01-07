@@ -61,7 +61,7 @@ results = analysis.GetResult()
 
 
 # %%# Make Barplot
-def barplot(data_samples, p=1, stars='ns', sd=0, mean=0, median=0):
+def barplot(data_samples, p=1, stars='ns', sd=0, mean=0, median=0, testname='', n=0):
     fig, ax = plt.subplots(figsize=(3, 4))
 
     colors = ['k', 'r', 'b', 'g']
@@ -103,6 +103,10 @@ def barplot(data_samples, p=1, stars='ns', sd=0, mean=0, median=0):
              va='bottom',
              color=col)
 
+    # Add custom subtitle aligned to the right at the bottom
+    fig.text(0.95, 0.01, '{}\nn={}'.format(testname, str(n)[1:-1]), 
+             ha='right', va='bottom', fontsize=8)
+
     # Remove borders
     for spine in ax.spines.values():
         spine.set_visible(False)
@@ -117,7 +121,10 @@ barplot(data,
         stars=results['Stars_Printed'], 
         sd=results['Groups_SD'], 
         mean=results['Groups_Mean'],
-        median=results['Groups_Median'])
+        median=results['Groups_Median'],
+        testname=results['Test_Name'],
+        n=results['Groups_N'],
+        )
 
 
 
