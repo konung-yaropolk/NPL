@@ -77,7 +77,7 @@ class __StatisticalTests():
     def t_test_single_sample(self):
         if self.popmean == None:
             self.popmean = 0
-            self.AddWarning('no_pop_mean_setup')
+            self.AddWarning('no_pop_mean_set')
         t_stat, t_p_value = ttest_1samp(self.data[0], self.popmean)
         if self.tails == 1:
             t_p_value /= 2
@@ -91,7 +91,7 @@ class __StatisticalTests():
     def wilcoxon_single_sample(self):
         if self.popmean == None:
             self.popmean = 0
-            self.AddWarning('no_pop_mean_setup')
+            self.AddWarning('no_pop_mean_set')
         data = [i - self.popmean for i in self.data[0]]
         w_stat, w_p_value = wilcoxon(data)
         if self.tails == 1:
@@ -175,7 +175,7 @@ class __TextFormatting():
                 output += element + (space-len(element))*delimiter
         return output
 
-    def print_groups(self, space=16, max_length=15):
+    def print_groups(self, space=24, max_length=15):
         self.log('')
         # Get the number of groups (rows) and the maximum length of rows
         data = self.data
@@ -239,7 +239,7 @@ class __TextFormatting():
                 return f'{p:.4g}'
             else:
                 return 'p < 0.0001'
-        return 'NaN'
+        return 'N/A'
 
     def print_results(self):
         self.log('\n\nResults: \n')
@@ -260,32 +260,30 @@ class __TextFormatting():
             'Significance(p<0.05)':  True if self.p_value.item() < 0.05 else False,
             'Stars_Printed': self.stars_str,
             'Test_Name': self.test_name,
-            'N_Groups': self.n_groups,
-            'Population_Mean': self.popmean if self.n_groups == 1 else 'NaN',
-            'Group_Size': [len(self.data[i]) for i in range(len(self.data))],
+            'Groups_Compared': self.n_groups,
+            'Population_Mean': self.popmean if self.n_groups == 1 else 'N/A',
             'Data_Normaly_Distributed': self.parametric,
-            'Parametric_Test_Applied': True if self.test_id in self.parametric_tests_ids else False,
+            'Parametric_Test_Applied': True if self.test_id in self.test_ids_parametric else False,
             'Paired_Test_Applied': self.paired,
             'Tails': self.tails,
             'p-value_exact': self.p_value.item(),
             'Stars':  self.stars_int,
-            'Stat_Value': self.test_stat.item(),
+            # 'Stat_Value': self.test_stat.item(),
             'Warnings': self.warnings,
+            'Groups_N': [len(self.data[i]) for i in range(len(self.data))],
+            'Groups_Median': [np.median(self.data[i]).item() for i in range(len(self.data))],
+            'Groups_Mean': [np.mean(self.data[i]).item() for i in range(len(self.data))],
+            'Groups_SD': [np.std(self.data[i]).item() for i in range(len(self.data))],
+            'Groups_SE': [np.std(self.data[i]).item() / np.sqrt(len(self.data)).item() for i in range(len(self.data))],
         }
 
     def log(self, *args, **kwargs):
         message = ' '.join(map(str, args))
-        print(message, **kwargs)
-        self.summary += '\n    ' + message
+        # print(message, **kwargs)
+        self.summary += '\n' + message
 
     def AddWarning(self, warning_id):
-        warnings = {
-            'not-numeric':                     '\nWarnig: Non-numeric data was found in input and ignored.\n        Make sure the input data is correct to get the correct results\n',
-            'param_test_with_non-normal_data': '\nWarnig: Parametric test was manualy chosen for Not-Normaly distributed data.\n        The results might be skewed. \n        Please, run non-parametric test or preform automatic test selection.\n',
-            'non-param_test_with_normal_data': '\nWarnig: Non-Parametric test was manualy chosen for Normaly distributed data.\n        The results might be skewed. \n        Please, run parametric test or preform automatic test selection.\n',
-            'no_pop_mean_setup':               '\nWarnig: No Population Mean was set up for single-sample test, used default 0 value.\n        The results might be skewed. \n        Please, set the Population Mean and run the test again.\n',
-        }
-        message = warnings[warning_id]
+        message = self.warning_ids_all[warning_id]
         self.log(message)
         self.warnings.append(message)
 
@@ -313,19 +311,25 @@ class StatisticalAnalysis(__StatisticalTests, __NormalityTests, __TextFormatting
 
     '''
 
-    def __init__(self, groups_list, paired=False, tails=2, popmean=None):
+    def __init__(self,
+                 groups_list,
+                 paired=False,
+                 tails=2,
+                 popmean=None,
+                 verbose=True):
         self.groups_list = groups_list
         self.paired = paired
         self.tails = tails
         self.popmean = popmean
+        self.verbose = verbose
         self.n_groups = len(self.groups_list)
         self.warning_flag_non_numeric_data = False
         self.summary = ''
-        self.parametric_tests_ids = ['t_test_independend',
-                                     't_test_paired',
-                                     't_test_single_sample',
-                                     'anova']
-        self.all_test_ids = [  # in aplhabetical orded:
+        self.test_ids_parametric = ['anova',
+                                    't_test_independend',
+                                    't_test_paired',
+                                    't_test_single_sample',]
+        self.test_ids_all = [  # in aplhabetical order
             'anova',
             'friedman',
             'kruskal_wallis',
@@ -333,9 +337,15 @@ class StatisticalAnalysis(__StatisticalTests, __NormalityTests, __TextFormatting
             't_test_independend',
             't_test_paired',
             't_test_single_sample',
-            'wilcoxon_single_sample',
             'wilcoxon',
+            'wilcoxon_single_sample',
         ]
+        self.warning_ids_all = {
+            'not-numeric':                     '\nWarning: Non-numeric data was found in input and ignored.\n         Make sure the input data is correct to get the correct results\n',
+            'param_test_with_non-normal_data': '\nWarning: Parametric test was manualy chosen for Not-Normaly distributed data.\n         The results might be skewed. \n         Please, run non-parametric test or preform automatic test selection.\n',
+            'non-param_test_with_normal_data': '\nWarning: Non-Parametric test was manualy chosen for Normaly distributed data.\n         The results might be skewed. \n         Please, run parametric test or preform automatic test selection.\n',
+            'no_pop_mean_set':                 '\nWarning: No Population Mean was set up for single-sample test, used default 0 value.\n         The results might be skewed. \n         Please, set the Population Mean and run the test again.\n',
+        }
 
     def __run_test(self, test='auto'):
 
@@ -350,7 +360,7 @@ class StatisticalAnalysis(__StatisticalTests, __NormalityTests, __TextFormatting
         self.p_value = None
 
         self.log('\n' + '-'*67)
-        self.log('Statistics module initiated for data of {} groups\n'.format(
+        self.log('Statistical analysis initiated for data in {} groups\n'.format(
             len(self.groups_list)))
 
         # adjusting input data type
@@ -358,9 +368,10 @@ class StatisticalAnalysis(__StatisticalTests, __NormalityTests, __TextFormatting
         if self.warning_flag_non_numeric_data:
             self.AddWarning('not-numeric')
 
-        # Assertion block
+        # User input assertion block
         try:
             assert self.tails in [1, 2], 'Tails parameter can be 1 or 2 only'
+            assert test in self.test_ids_all or test == 'auto', 'Wrong test id choosen, ensure you called correct function'
             assert not (self.n_groups > 1
                         and (test == 't_test_single_sample'
                              or test == 'wilcoxon_single_sample')), 'Only one group of data must be given for single-group tests'
@@ -387,6 +398,7 @@ class StatisticalAnalysis(__StatisticalTests, __NormalityTests, __TextFormatting
             self.log('\nTest  :', test)
             self.log('Error :', error)
             self.log('-'*67 + '\n')
+            print(self.summary)
             return
 
         # Print the data
@@ -411,9 +423,9 @@ class StatisticalAnalysis(__StatisticalTests, __NormalityTests, __TextFormatting
         self.log('Test chosen by user:          ', test)
 
         # Wrong test Warnings
-        if not test == 'auto' and not self.parametric and test in self.parametric_tests_ids:
+        if not test == 'auto' and not self.parametric and test in self.test_ids_parametric:
             self.AddWarning('param_test_with_non-normal_data')
-        if not test == 'auto' and self.parametric and not test in self.parametric_tests_ids:
+        if not test == 'auto' and self.parametric and not test in self.test_ids_parametric:
             self.AddWarning('non-param_test_with_normal_data')
 
         if test == 'anova':
@@ -430,10 +442,10 @@ class StatisticalAnalysis(__StatisticalTests, __NormalityTests, __TextFormatting
             self.t_test_paired()
         elif test == 't_test_single_sample':
             self.t_test_single_sample()
-        elif test == 'wilcoxon_single_sample':
-            self.wilcoxon_single_sample()
         elif test == 'wilcoxon':
             self.wilcoxon()
+        elif test == 'wilcoxon_single_sample':
+            self.wilcoxon_single_sample()
         else:
             self.log('Automatic test selection preformed.')
             self.__auto()
@@ -444,6 +456,10 @@ class StatisticalAnalysis(__StatisticalTests, __NormalityTests, __TextFormatting
         self.log(
             '\n\nResults above are accessible as a dictionary via GetResult() method')
         self.log('-'*67 + '\n')
+
+        # print the results to console:
+        if self.verbose == True:
+            print(self.summary)
 
     def __auto(self):
 
@@ -517,42 +533,6 @@ class StatisticalAnalysis(__StatisticalTests, __NormalityTests, __TextFormatting
 
     def PrintSummary(self):
         print(self.summary)
-
-
-# Example usage
-
-# data = [list(np.random.normal(i, 1, 100)) for i in range(3)]
-# data = [list(np.random.uniform(i, 1, 100)) for i in range(3)]
-
-# new_csv = csv.OpenFile('data.csv')
-# data = new_csv.Cols[2:4]
-
-
-# analysis = StatisticalAnalysis(data, paired=False, tails=2, popmean=0)
-
-# analysis.RunAuto()
-
-# # 2 groups independend:
-# analysis.RunTtest()
-# analysis.RunMannWhitney()
-
-# # 2 groups paired
-# analysis.RunTtestPaired()
-# analysis.RunWilcoxon()
-
-# # 3 and more indepennded groups comparison:
-# analysis.RunAnova()
-# analysis.RunKruskalWallis()
-
-# # 3 and more paired groups comparison:
-# analysis.RunFriedman()
-
-# # single group test
-# analysis.RunTtestSingleSample()
-# analysis.RunWilcoxonSingleSample()
-
-
-# results = analysis.GetResult()
 
 
 if __name__ == '__main__':

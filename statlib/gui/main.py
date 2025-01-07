@@ -2,8 +2,8 @@ import sys
 from PyQt6 import uic
 from PyQt6.QtWidgets import QApplication, QMainWindow, QMessageBox, QTextEdit, QPushButton, QPlainTextEdit
 
-import stats
-from mainwindow import Ui_MainWindow
+import statlib
+from mainwindow_layout import Ui_MainWindow
 
 
 class MainWindow(QMainWindow):
@@ -17,7 +17,7 @@ class MainWindow(QMainWindow):
     # def load_UI_from_ui(self,):
 
     #     # Load the .ui file
-    #     uic.loadUi('mainwindow.ui', self)
+    #     uic.loadUi('mainwindow_layout.ui', self)
 
     #     # Find UI elements
     #     self.input_field = self.findChild(QPlainTextEdit, 'input_field')
@@ -63,34 +63,35 @@ class MainWindow(QMainWindow):
         padded_matrix = [row + [None] * (max_len - len(row)) for row in matrix]
         transposed = [[padded_matrix[j][i]
                        for j in range(len(padded_matrix))] for i in range(max_len)]
+
         # Remove None values if padding was used
         return [[element for element in row if element is not None] for row in transposed]
 
     def runAuto(self):
         self.errorMsg.setText('')
         data_text = self.input_field.toPlainText()
-        try:
-            groups_list = self.listify_text(data_text)
-            analysis = stats.StatisticalAnalysis(
-                groups_list,
-                paired=self.dependendGroups.isChecked(),
-                tails=2 if self.twoTailed.isChecked() else 1,
-                popmean=float(self.popMean.text()))
-            analysis.RunAuto()
-            result = analysis.GetSummary()
-            self.result_display.setPlainText(result)
-        except Exception as e:
-            e = 'Error: \n' + str(e)
-            print(e)
-            self.errorMsg.setText(e)
-            # QMessageBox.critical(self, "Error", str(e))
+        # try:
+        groups_list = self.listify_text(data_text)
+        analysis = statlib.StatisticalAnalysis(
+            groups_list,
+            paired=self.dependendGroups.isChecked(),
+            tails=2 if self.twoTailed.isChecked() else 1,
+            popmean=float(self.popMean.text()))
+        analysis.RunAuto()
+        result = analysis.GetSummary()
+        self.result_display.setPlainText(result)
+        # except Exception as e:
+        #     e = 'Error: \n' + str(e)
+        #     print(e)
+        #     self.errorMsg.setText(e)
+        #     # QMessageBox.critical(self, "Error", str(e))
 
     def runManual(self):
         self.errorMsg.setText('')
         data_text = self.input_field.toPlainText()
         try:
             groups_list = self.listify_text(data_text)
-            analysis = stats.StatisticalAnalysis(
+            analysis = statlib.StatisticalAnalysis(
                 groups_list,
                 paired=self.dependendGroups.isChecked(),
                 tails=2 if self.twoTailed.isChecked() else 1,
@@ -104,14 +105,14 @@ class MainWindow(QMainWindow):
                 self.t_test_independend.isChecked(),
                 self.t_test_paired.isChecked(),
                 self.t_test_single_sample.isChecked(),
-                self.wilcoxon_single_sample.isChecked(),
                 self.wilcoxon.isChecked(),
+                self.wilcoxon_single_sample.isChecked(),
             ]
 
             checked_test_ids = []
-            for i in range(len(analysis.all_test_ids)):
+            for i in range(len(analysis.test_ids_all)):
                 if checkbuttons_state_list[i]:
-                    checked_test_ids.append(analysis.all_test_ids[i])
+                    checked_test_ids.append(analysis.test_ids_all[i])
 
             for test_id in checked_test_ids:
                 analysis.RunManual(test_id)

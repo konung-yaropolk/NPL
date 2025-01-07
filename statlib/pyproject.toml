@@ -3,14 +3,14 @@ requires = ["setuptools>=61.0", "scsv", "numpy", "scipy"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "stats"
+name = "statlib"
 dynamic = ["version"]
 license = {file = "LICENSE"}
 authors = [
   { name="konung-yaropolk", email="yaropolk1995@gmail.com" },
   { name="SciWare LLC"},
 ]
-description = "stats - a simple statistical analysis tool"
+description = "statlib - a simple statistical analysis tool"
 keywords = ["Science", "Statistics"]
 readme = {file = "README.md", content-type = "text/markdown"}
 requires-python = ">=3.10"
@@ -30,11 +30,12 @@ dependencies = [
     "numpy",
     "scipy",
     "scsv>=0.1.4",
+    "PyQt6",
 ]
 
 [project.urls]
-Homepage = "https://github.com/konung-yaropolk/stats"
-Issues = "https://github.com/konung-yaropolk/stats/issues"
+Homepage = "https://github.com/konung-yaropolk/NPL"
+Issues = "https://github.com/konung-yaropolk/NPL/issues"
 
 [tool.setuptools.dynamic]
-version = {attr = "stats.__version__"}
+version = {attr = "statlib.__version__"}
