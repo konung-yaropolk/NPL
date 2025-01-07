@@ -231,15 +231,15 @@ class __TextFormatting():
         p = self.p_value.item()
         if p is not None:
             if p > 0.99:
-                return 'p > 0.99'
+                return 'p>0.99'
             elif p >= 0.01:
-                return f'p = {p:.2g}'
+                return f'p={p:.2g}'
             elif p >= 0.001:
-                return f'p = {p:.2g}'
+                return f'p={p:.2g}'
             elif p >= 0.0001:
-                return f'p = {p:.1g}'
+                return f'p={p:.1g}'
             elif p < 0.0001:
-                return 'p < 0.0001'
+                return 'p<0.0001'
             else:
                 return 'N/A'
         return 'N/A'

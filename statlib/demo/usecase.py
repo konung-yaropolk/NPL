@@ -62,9 +62,10 @@ results = analysis.GetResult()
 
 # %%# Make Barplot
 def barplot(data_samples, p=1, stars='ns', sd=0, mean=0, median=0):
-    fig, ax = plt.subplots()
+    fig, ax = plt.subplots(figsize=(3, 4))
 
-    colors = ['k', 'r', 'b', 'g', 'orange']
+    colors = ['k', 'r', 'b', 'g']
+    colors_fill = ['#CCCCCC', '#FFCCCC', '#CCCCFF', '#CCFFCC']
 
     for i, data in enumerate(data_samples):
         x = i + 1  # Bar position
@@ -72,25 +73,28 @@ def barplot(data_samples, p=1, stars='ns', sd=0, mean=0, median=0):
         ax.bar(x, 
                mean[i], 
                yerr=sd[i], 
+               width = .8,
                capsize=10, 
+               ecolor='r',
                edgecolor=colors[i % len(colors)], 
-               fill=False, 
+               facecolor=colors_fill[i % len(colors_fill)],
+               fill=True, 
                linewidth=2)
         # Data points 
-        spread = np.random.uniform(-0.1, 0.1, size=len(data))  # Adjust spread range
-        ax.scatter(x + spread, data, color='black', s=16, zorder=3, alpha=0.5)
+        spread = np.random.uniform(-0.15, 0.15, size=len(data))  # Adjust spread range
+        ax.scatter(x + spread, data, color='black', s=16, zorder=2, alpha=0.5)
         ax.plot(x,
                 median[i],
-                marker='o', 
-                markerfacecolor='none', 
-                markeredgecolor='black', 
+                marker='x', 
+                markerfacecolor='#00000000', 
+                markeredgecolor='r', 
                 markersize=10, 
                 markeredgewidth=1)
 
     # Significance bar
     y_range = max([max(data) for data in data_samples])
     x1, x2 = 1, len(data_samples)
-    y, h, col = 1.05 * y_range, .1 * y_range, 'k'
+    y, h, col = 1.05 * y_range, .05 * y_range, 'k'
     ax.plot([x1, x1, x2, x2], [y, y + h, y + h, y], lw=1.5, c=col)
     ax.text((x1 + x2) * .5,
              y + h,
