@@ -9,7 +9,7 @@ import statlib
 
 # %%# generate random normal data:
 groups = 2
-data = [list(np.random.normal(0.5*i + 3, 0.2*i+1, 100)) for i in range(groups)]
+data = [list(np.random.normal(.5*i + 3, 1-.2*i, 100)) for i in range(groups)]
 
 # %%# generate random non-normal data:
 # groups = 2
@@ -18,7 +18,7 @@ data = [list(np.random.normal(0.5*i + 3, 0.2*i+1, 100)) for i in range(groups)]
 
 # %%# or load from csv:
 # new_csv = csv.OpenFile('data.csv')
-# data = new_csv.Cols[2:4]
+# data = new_csv.ColsFloat[2:4]
 
 # %%# set the parameters:
 paired = False   # is groups dependend or not
