@@ -29,7 +29,7 @@ classifiers = [
 dependencies = [
     "numpy",
     "scipy",
-    "scsv>=0.1.4",
+    "scsv>=0.1.5",
     "PyQt6",
 ]
 
