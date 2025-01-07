@@ -127,3 +127,5 @@ barplot(data,
         testname=results['Test_Name'],
         n=results['Groups_N'],
         )
+
+# %%
