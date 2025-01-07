@@ -235,9 +235,9 @@ class __TextFormatting():
             elif p >= 0.01:
                 return f'p = {p:.2g}'
             elif p >= 0.001:
-                return f'p = {p:.3g}'
+                return f'p = {p:.1g}'
             elif p >= 0.0001:
-                return f'p = {p:.4g}'
+                return f'p = {p:.1g}'
             elif p < 0.0001:
                 return 'p < 0.0001'
             else:
