@@ -28,6 +28,7 @@ classifiers = [
 ]
 dependencies = [
     "numpy",
+    "matplotlib", 
     "scipy",
     "scsv>=0.1.5",
     "PyQt6",
