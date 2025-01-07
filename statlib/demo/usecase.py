@@ -9,11 +9,11 @@ import statlib
 
 # %%# generate random normal data:
 groups = 2
-data = [list(np.random.normal(.5*i + 3, abs(1-.2*i), 100)) for i in range(groups)]
+data = [list(np.random.normal(.5*i + 3, abs(1-.2*i), 50)) for i in range(groups)]
 
 # %%# generate random non-normal data:
 # groups = 2
-# data = [list(np.random.uniform(i+3, i+1, 100)) for i in range(groups)]
+# data = [list(np.random.uniform(i+3, i+1, 50)) for i in range(groups)]
 
 
 # %%# or load from csv:
