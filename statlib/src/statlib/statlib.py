@@ -250,6 +250,8 @@ class __TextFormatting():
             shift = 27 - len(i)
             if i == 'Warnings':
                 self.log(i, ':', ' ' * shift, len(self.results[i]))
+            elif i == 'Samples':
+                pass
             else:
                 self.log(i, ':', ' ' * shift, self.results[i])
 
@@ -278,6 +280,7 @@ class __TextFormatting():
             'Groups_Mean': [np.mean(self.data[i]).item() for i in range(len(self.data))],
             'Groups_SD': [np.std(self.data[i]).item() for i in range(len(self.data))],
             'Groups_SE': [np.std(self.data[i]).item() / np.sqrt(len(self.data)).item() for i in range(len(self.data))],
+            'Samples': self.data,
         }
 
     def log(self, *args, **kwargs):
@@ -353,7 +356,7 @@ class StatisticalAnalysis(__StatisticalTests, __NormalityTests, __TextFormatting
     def __run_test(self, test='auto'):
 
         # reset values from previous tests
-        self.results = {}
+        self.results = None
         self.warnings = []
         self.normals = []
         self.methods = []

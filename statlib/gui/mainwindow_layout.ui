@@ -201,7 +201,7 @@ p, li { white-space: pre-wrap; }
            <x>0</x>
            <y>460</y>
            <width>221</width>
-           <height>151</height>
+           <height>161</height>
           </rect>
          </property>
          <property name="title">
@@ -214,7 +214,7 @@ p, li { white-space: pre-wrap; }
           <property name="geometry">
            <rect>
             <x>30</x>
-            <y>20</y>
+            <y>10</y>
             <width>111</width>
             <height>31</height>
            </rect>
@@ -227,7 +227,7 @@ p, li { white-space: pre-wrap; }
           <property name="geometry">
            <rect>
             <x>20</x>
-            <y>50</y>
+            <y>40</y>
             <width>181</width>
             <height>61</height>
            </rect>
@@ -269,7 +269,7 @@ p, li { white-space: pre-wrap; }
           <property name="geometry">
            <rect>
             <x>30</x>
-            <y>110</y>
+            <y>101</y>
             <width>91</width>
             <height>31</height>
            </rect>
@@ -283,7 +283,7 @@ p, li { white-space: pre-wrap; }
           <property name="geometry">
            <rect>
             <x>130</x>
-            <y>119</y>
+            <y>110</y>
             <width>61</width>
             <height>21</height>
            </rect>
@@ -296,6 +296,19 @@ p, li { white-space: pre-wrap; }
           </property>
           <property name="maxLength">
            <number>20</number>
+          </property>
+         </widget>
+         <widget class="QCheckBox" name="makePlot">
+          <property name="geometry">
+           <rect>
+            <x>30</x>
+            <y>130</y>
+            <width>111</width>
+            <height>31</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>Plot Result</string>
           </property>
          </widget>
         </widget>
@@ -381,9 +394,9 @@ p, li { white-space: pre-wrap; }
          <property name="geometry">
           <rect>
            <x>10</x>
-           <y>600</y>
+           <y>610</y>
            <width>201</width>
-           <height>41</height>
+           <height>31</height>
           </rect>
          </property>
          <property name="font">
