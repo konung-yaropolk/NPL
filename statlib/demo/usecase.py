@@ -4,16 +4,18 @@ import matplotlib.pyplot as plt
 import statlib
 
 
-
 # Example usage:
 
 # %%# generate random normal data:
 groups = 2
-data = [list(np.random.normal(.5*i + 3, abs(1-.2*i), 50)) for i in range(groups)]
+n = 30
+data = [list(np.random.normal(.5*i + 4, abs(1-.2*i), n))
+        for i in range(groups)]
 
 # %%# generate random non-normal data:
 # groups = 2
-# data = [list(np.random.uniform(i+3, i+1, 50)) for i in range(groups)]
+# n = 30
+# data = [list(np.random.uniform(i+3, i+1, n)) for i in range(groups)]
 
 
 # %%# or load from csv:
@@ -59,7 +61,6 @@ analysis.RunAuto()
 results = analysis.GetResult()
 
 
-
 # %%# Make Barplot
 def barplot(data_samples, p=1, stars='ns', sd=0, mean=0, median=0, testname='', n=0):
     fig, ax = plt.subplots(figsize=(3, 4))
@@ -70,25 +71,26 @@ def barplot(data_samples, p=1, stars='ns', sd=0, mean=0, median=0, testname='', 
     for i, data in enumerate(data_samples):
         x = i + 1  # Bar position
         # Bars:
-        ax.bar(x, 
-               mean[i], 
-               yerr=sd[i], 
-               width = .8,
-               capsize=10, 
+        ax.bar(x,
+               mean[i],
+               yerr=sd[i],
+               width=.8,
+               capsize=10,
                ecolor='r',
-               edgecolor=colors[i % len(colors)], 
+               edgecolor=colors[i % len(colors)],
                facecolor=colors_fill[i % len(colors_fill)],
-               fill=True, 
+               fill=True,
                linewidth=2)
-        # Data points 
-        spread = np.random.uniform(-0.15, 0.15, size=len(data))  # Adjust spread range
-        ax.scatter(x + spread, data, color='black', s=16, zorder=2, alpha=0.5)
+        # Data points
+        # Adjust spread range
+        spread = np.random.uniform(-.10, .10, size=len(data))
+        ax.scatter(x + spread, data, color='black', s=16, zorder=1, alpha=0.5)
         ax.plot(x,
                 median[i],
-                marker='x', 
-                markerfacecolor='#00000000', 
-                markeredgecolor='r', 
-                markersize=10, 
+                marker='x',
+                markerfacecolor='#00000000',
+                markeredgecolor='r',
+                markersize=10,
                 markeredgewidth=1)
 
     # Significance bar
@@ -97,14 +99,14 @@ def barplot(data_samples, p=1, stars='ns', sd=0, mean=0, median=0, testname='', 
     y, h, col = 1.05 * y_range, .05 * y_range, 'k'
     ax.plot([x1, x1, x2, x2], [y, y + h, y + h, y], lw=1.5, c=col)
     ax.text((x1 + x2) * .5,
-             y + h,
-             '{}\n{}'.format(p, stars),
-             ha='center',
-             va='bottom',
-             color=col)
+            y + h,
+            '{}\n{}'.format(p, stars),
+            ha='center',
+            va='bottom',
+            color=col)
 
     # Add custom subtitle aligned to the right at the bottom
-    fig.text(0.95, 0.01, '{}\nn={}'.format(testname, str(n)[1:-1]), 
+    fig.text(0.95, 0.01, '{}\nn={}'.format(testname, str(n)[1:-1]),
              ha='right', va='bottom', fontsize=8)
 
     # Remove borders
@@ -116,15 +118,12 @@ def barplot(data_samples, p=1, stars='ns', sd=0, mean=0, median=0, testname='', 
     plt.show()
 
 
-barplot(data, 
-        p=results['p-value'], 
-        stars=results['Stars_Printed'], 
-        sd=results['Groups_SD'], 
+barplot(data,
+        p=results['p-value'],
+        stars=results['Stars_Printed'],
+        sd=results['Groups_SD'],
         mean=results['Groups_Mean'],
         median=results['Groups_Median'],
         testname=results['Test_Name'],
         n=results['Groups_N'],
         )
-
-
-
