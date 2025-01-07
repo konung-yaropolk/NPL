@@ -213,14 +213,15 @@ class __TextFormatting():
             self.log(self.autospace(row_values, space))
 
     def make_stars(self) -> int:
-        if self.p_value is not None:
-            if self.p_value < 0.0001:
+        p = self.p_value.item()
+        if p is not None:
+            if p < 0.0001:
                 return 4
-            if self.p_value < 0.001:
+            if p < 0.001:
                 return 3
-            elif self.p_value < 0.01:
+            elif p < 0.01:
                 return 2
-            elif self.p_value < 0.05:
+            elif p < 0.05:
                 return 1
             else:
                 return 0
@@ -232,13 +233,15 @@ class __TextFormatting():
             if p > 0.99:
                 return 'p > 0.99'
             elif p >= 0.01:
-                return f'{p:.2g}'
+                return f'p = {p:.2g}'
             elif p >= 0.001:
-                return f'{p:.3g}'
+                return f'p = {p:.3g}'
             elif p >= 0.0001:
-                return f'{p:.4g}'
-            else:
+                return f'p = {p:.4g}'
+            elif p < 0.0001:
                 return 'p < 0.0001'
+            else:
+                return 'N/A'
         return 'N/A'
 
     def print_results(self):
