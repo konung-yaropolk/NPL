@@ -30,6 +30,7 @@ dependencies = [
     "numpy",
     "matplotlib", 
     "scipy",
+    "openpyxl",
     "scsv>=0.1.5",
     "PyQt6",
 ]

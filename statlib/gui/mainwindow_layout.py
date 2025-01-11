@@ -124,10 +124,10 @@ class Ui_MainWindow(object):
         self.errorMsg.setIndent(-1)
         self.errorMsg.setObjectName("errorMsg")
         self.buttonLayout.addWidget(self.groupBox_2)
-        self.runButton = QtWidgets.QPushButton(parent=self.centralwidget)
-        self.runButton.setDefault(False)
-        self.runButton.setObjectName("runButton")
-        self.buttonLayout.addWidget(self.runButton)
+        self.runManualButton = QtWidgets.QPushButton(parent=self.centralwidget)
+        self.runManualButton.setDefault(False)
+        self.runManualButton.setObjectName("runManualButton")
+        self.buttonLayout.addWidget(self.runManualButton)
         self.runAutoButton = QtWidgets.QPushButton(parent=self.centralwidget)
         self.runAutoButton.setAutoDefault(True)
         self.runAutoButton.setDefault(True)
@@ -145,7 +145,7 @@ class Ui_MainWindow(object):
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "Statistics"))
-        self.input_field.setPlaceholderText(_translate("MainWindow", "Paste your table here"))
+        self.input_field.setPlaceholderText(_translate("MainWindow", "Paste your table or drag & drop the table file here (.xlsx and .csv formats accepted)"))
         self.result_display.setHtml(_translate("MainWindow", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
 "<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
 "p, li { white-space: pre-wrap; }\n"
@@ -178,5 +178,5 @@ class Ui_MainWindow(object):
         self.groupBox_12.setTitle(_translate("MainWindow", "Independend Groups"))
         self.anova.setText(_translate("MainWindow", "ANOVA (parametric)"))
         self.kruskal_wallis.setText(_translate("MainWindow", "Kruskal-Wallis (non-param.)"))
-        self.runButton.setText(_translate("MainWindow", "                    Run Selected Tests                   "))
+        self.runManualButton.setText(_translate("MainWindow", "                    Run Selected Tests                   "))
         self.runAutoButton.setText(_translate("MainWindow", "Run Auto Test"))

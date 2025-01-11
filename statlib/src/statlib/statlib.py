@@ -375,6 +375,10 @@ class StatisticalAnalysis(__StatisticalTests, __NormalityTests, __TextFormatting
         if self.warning_flag_non_numeric_data:
             self.AddWarning('not-numeric')
 
+        # delete the empty cols from input
+        self.data = [col for col in self.data if any(
+            x is not None for x in col)]
+
         # User input assertion block
         try:
             assert self.tails in [1, 2], 'Tails parameter can be 1 or 2 only'
@@ -383,7 +387,7 @@ class StatisticalAnalysis(__StatisticalTests, __NormalityTests, __TextFormatting
                         and (test == 't_test_single_sample'
                              or test == 'wilcoxon_single_sample')), 'Only one group of data must be given for single-group tests'
             assert all(len(
-                lst) > 2 for lst in self.data), 'Each group must contain at least three values'
+                group) > 2 for group in self.data), 'Each group must contain at least three values'
             assert not (self.paired == True and not all(len(lst) == len(
                 self.data[0]) for lst in self.data)), 'Paired groups must be the same length'
             assert not (test == 'friedman' and not all(len(lst) == len(
@@ -495,6 +499,7 @@ class StatisticalAnalysis(__StatisticalTests, __NormalityTests, __TextFormatting
                 else:
                     return self.kruskal_wallis_test()
 
+    # public methods:
     def RunAuto(self):
         self.__run_test(test='auto')
 

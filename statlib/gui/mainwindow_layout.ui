@@ -22,7 +22,7 @@
     <item>
      <widget class="QPlainTextEdit" name="input_field">
       <property name="placeholderText">
-       <string>Paste your table here</string>
+       <string>Paste your table or drag &amp; drop the table file here (.xlsx and .csv formats accepted)</string>
       </property>
      </widget>
     </item>
@@ -417,7 +417,7 @@ p, li { white-space: pre-wrap; }
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="runButton">
+       <widget class="QPushButton" name="runManualButton">
         <property name="text">
          <string>                    Run Selected Tests                   </string>
         </property>
