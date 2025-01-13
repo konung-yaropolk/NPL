@@ -1,6 +1,6 @@
 import random
 import matplotlib.pyplot as plt
-import statlib
+import AutoStatLib
 
 class Methods():
 
@@ -9,7 +9,7 @@ class Methods():
         data_text = self.ui.input_field.toPlainText()
         try:
             groups_list = self.listify_text(data_text)
-            analysis = statlib.StatisticalAnalysis(
+            analysis = AutoStatLib.StatisticalAnalysis(
                 groups_list,
                 paired=self.ui.dependendGroups.isChecked(),
                 tails=2 if self.ui.twoTailed.isChecked() else 1,
@@ -31,7 +31,7 @@ class Methods():
         data_text = self.ui.input_field.toPlainText()
         try:
             groups_list = self.listify_text(data_text)
-            analysis = statlib.StatisticalAnalysis(
+            analysis = AutoStatLib.StatisticalAnalysis(
                 groups_list,
                 paired=self.ui.dependendGroups.isChecked(),
                 tails=2 if self.ui.twoTailed.isChecked() else 1,
