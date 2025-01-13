@@ -1,14 +1,14 @@
 [build-system]
-requires = ["setuptools>=62.6", "numpy", "scipy"]
+requires = ["setuptools>=61.0", "scsv", "numpy", "scipy"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "statlib"
-dynamic = ["version", "dependencies"]
+dynamic = ["version"]
 license = {file = "LICENSE"}
 authors = [
-  { name="konung-yaropolk", email="yaropolk1995@gmail.com" },
   { name="Stemonitis"},
+  { name="konung-yaropolk", email="yaropolk1995@gmail.com" },
   { name="SciWare LLC"},
 ]
 description = "statlib - a simple statistical analysis tool"
@@ -27,6 +27,14 @@ classifiers = [
     "Topic :: Software Development :: Libraries",
     "Topic :: Software Development :: Libraries :: Python Modules",
 ]
+dependencies = [
+    "numpy",
+    "matplotlib", 
+    "scipy",
+    "openpyxl",
+    "scsv>=0.1.5",
+    "PyQt6",
+]
 
 [project.urls]
 Homepage = "https://github.com/konung-yaropolk/NPL"
@@ -34,4 +42,3 @@ Issues = "https://github.com/konung-yaropolk/NPL/issues"
 
 [tool.setuptools.dynamic]
 version = {attr = "statlib.__version__"}
-dependencies = {file = ["requirements.txt"]}

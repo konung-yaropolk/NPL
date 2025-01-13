@@ -1,4 +1,3 @@
-import scsv as csv
 import numpy as np
 # import scipy.stats as stats
 from scipy.stats import ttest_rel, ttest_ind, ttest_1samp, wilcoxon, mannwhitneyu, f_oneway, kruskal, friedmanchisquare, shapiro, norm
@@ -548,4 +547,4 @@ class StatisticalAnalysis(__StatisticalTests, __NormalityTests, __TextFormatting
 
 
 if __name__ == '__main__':
-    print('\nThis script can be used as an imported module only\n')
+    print('\nThis package works as an imported module only\n')

@@ -1,15 +1,8 @@
-import sys
+import random
 import matplotlib.pyplot as plt
-import numpy as np
-import csv
 import statlib
-from openpyxl import load_workbook
-from PyQt6.QtWidgets import QApplication, QMainWindow, QPlainTextEdit
-# , QMessageBox, QTextEdit, QPushButton
-from mainwindow_layout import Ui_MainWindow
 
-
-class miscMethods():
+class Methods():
 
     def runAuto(self):
         self.ui.errorMsg.setText('')
@@ -107,8 +100,8 @@ class miscMethods():
                    linewidth=2)
             # Data points:
             # Adjust random horizontal spread range
-            spread = np.random.uniform(-.10, .10, size=len(data))
-            ax.scatter(x + spread, data, color='black',
+            spread = tuple(random.uniform(-.10, .10) for _ in data)
+            ax.scatter(tuple(i+x for i in spread), data, color='black',
                        s=16, zorder=1, alpha=0.5)
             ax.plot(x,
                     median[i],
@@ -151,72 +144,3 @@ class miscMethods():
                        for j in range(len(padded_matrix))] for i in range(max_len)]
         # Remove None values if padding was used
         return [[element for element in row if element is not None] for row in transposed]
-
-
-class PlainTextEditDragNDrop(QPlainTextEdit):
-    def __init__(self, parent=None):
-        super().__init__(parent)
-        self.setAcceptDrops(True)
-
-    def dragEnterEvent(self, event):
-        if event.mimeData().hasUrls():
-            event.acceptProposedAction()
-        else:
-            event.ignore()
-
-    def dropEvent(self, event):
-        for url in event.mimeData().urls():
-            file_path = url.toLocalFile()
-            if file_path.endswith('.csv'):
-                self.open_csv(file_path)
-            elif file_path.endswith('.xlsx'):
-                self.open_xlsx(file_path)
-            else:
-                self.setPlainText("Only CSV and XLSX files are supported.")
-
-    def open_csv(self, file_path):
-        with open(file_path, 'r', encoding='utf-8-sig') as file:
-            reader = csv.reader(file)
-            content = '\n'.join(['\t'.join(row) for row in reader])
-            self.setPlainText(content)
-
-    def open_xlsx(self, file_path):
-        workbook = load_workbook(file_path)
-        sheet = workbook.active
-        content = '\n'.join(['\t'.join(
-            [str(cell.value) if cell.value is not None else '' for cell in row]) for row in sheet.iter_rows()])
-        self.setPlainText(content)
-
-
-class MainWindow(QMainWindow, miscMethods):
-
-    def __init__(self):
-        super().__init__()
-        self.load_UI()
-
-    def load_UI(self,):
-        self.ui = Ui_MainWindow()
-        self.ui.setupUi(self)
-        # Bind functions to butts:
-        self.ui.runAutoButton.clicked.connect(self.runAuto)
-        self.ui.runManualButton.clicked.connect(self.runManual)
-        # replace the input_field with Drag-n-Drop-able one:
-        self.replace_input_field()
-
-    def replace_input_field(self):
-        new_text_edit = PlainTextEditDragNDrop(self)
-        placeholder_text = self.ui.input_field.placeholderText()
-        layout = self.centralWidget().layout()
-        layout.replaceWidget(self.ui.input_field, new_text_edit)
-        self.ui.input_field.deleteLater()
-        self.ui.input_field = new_text_edit
-        self.ui.input_field.setPlaceholderText(placeholder_text)
-
-
-if __name__ == '__main__':
-    # import pyi_splash
-    app = QApplication(sys.argv)
-    main_window = MainWindow()
-    main_window.show()
-    # pyi_splash.close()
-    sys.exit(app.exec())
