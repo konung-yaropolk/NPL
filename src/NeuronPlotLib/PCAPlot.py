@@ -28,11 +28,11 @@ class PCAPlot:
         self.raw_data = data
         self.mask = mask
         self.feature_names = np.array(feature_names)
-        self.normalized_data = self.normalize_data()
+        self.normalized_data = self._normalize_data()
         self.n_features = len(feature_names)
-        self.PCA = self.get_fitted_PCA()
+        self.PCA = self._get_fitted_PCA()
         self.principal_components = self.PCA.components_
-        self.transformed_data = self.transform_data()
+        self.transformed_data = self._transform_data()
         self.explained_variance = self.PCA.explained_variance_ratio_
         self.eigenvalues = self.PCA.explained_variance_
         self.covariance = self.PCA.get_covariance()
@@ -40,14 +40,15 @@ class PCAPlot:
         
         
     #helper methods
-    def normalize_data(self) -> list:
+    def _normalize_data(self) -> list:
         sc = StandardScaler()
         return sc.fit_transform(self.raw_data)
     
-    def get_fitted_PCA(self):
+    def _get_fitted_PCA(self):
         pca = PCA().fit(self.normalized_data)
         return pca
-    def transform_data(self):
+        
+    def _transform_data(self):
         return self.PCA.transform(self.normalized_data)
    
    
@@ -193,7 +194,8 @@ class PCAPlot:
         fig.update_traces(diagonal_visible=False)
         fig.show()
   
-  #analytical methods
+  # analytical methods
+  # add the output in the form of lists or dictionaries
     def print_features_of_each_component(self):
         data = pd.DataFrame(pca.principal_components.T, columns=[f'PC{i}' for i in range(1, self.n_features+1)], index=self.feature_names)
         print(data)
@@ -234,7 +236,7 @@ pca.plot_transformed_data_2D(1,2,[1,2,3,4,5,6,7,8,9,10], True)
 pca = PCAPlot(data, features)
 # pca.print_features_of_each_component()
 
-# pca.print_important_features_for_each_component()
+pca.print_important_features_for_each_component()
 # pca.plot_principal_components_heatmap()
 # pca.plot_cumulative_explained_variance()
 
@@ -254,7 +256,7 @@ pca.plot_covariance_matrix()
 pca.plot_any_two_normalized_features_with_eigenvectors()
 
 # %%
-format(pca_breast.explained_variance_ratio_))
+format(pca_breast.explained_variance_ratio_)
 
 #%%
 all = [1, 1]
