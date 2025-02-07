@@ -2,6 +2,7 @@
 #!/usr/bin/env python
 import matplotlib.pyplot as plt
 import matplotlib.colors as color
+import AutoStatLib
 import numpy as np
 import seaborn as sns
 import pandas as pd
@@ -51,8 +52,7 @@ class BarGraph:
     ### barWidth : regulates bar thickness, varies from 0.0 to 1, where 1 yields no space in between bars, default is 0.9 ###
     ### colorsBarsFill : 
     
-    
-    
+   
     def _identify_colors(self,
                          colorInput):
            ##we need to check if this is a singular value if it is color like
@@ -178,6 +178,57 @@ class BarGraph:
 
 
 
+        # initiate the auto stats analysis and get results
+        analysis = AutoStatLib.StatisticalAnalysis(
+            data, paired=False, tails=2, popmean=0, verbose=False)
+
+        analysis.RunAuto()
+        results = analysis.GetResult()
+
+        p=results['p-value']
+        stars=results['Stars_Printed']
+        testname=results['Test_Name']
+        n=results['Groups_N']
+
+
+        y_range = max([max(data) for data in y])
+        x1, x2 = 0, len(y)-1
+        y_pos, h, col = 1.05 * y_range, .05 * y_range, 'k'
+
+        if vertical:
+            # Significance bar for vertical graph
+            ax.plot([x1, x1, x2, x2], [y_pos, y_pos + h, y_pos + h, y_pos], lw=1.5, c=col)
+            ax.text((x1 + x2) * .5,
+                    y_pos + h,
+                    '{}\n{}'.format(p, stars),
+                    ha='center',
+                    va='bottom',
+                    color=col)
+            ax.xaxis.set_visible(False)
+        else:
+            # Significance bar for horizontal graph
+            ax.plot([y_pos, y_pos + h, y_pos + h, y_pos], [x1, x1, x2, x2], lw=1.5, c=col)
+            ax.text(y_pos + h*1.6,
+                    x2/2,
+                    '{}\n{}'.format(p, stars),
+                    ha='center',
+                    va='center',
+                    rotation=-90,
+                    color=col)
+            ax.yaxis.set_visible(False)
+
+
+        # Add subtitle aligned to the right at the bottom
+        fig.text(0.95, 0.01, '{}\nn={}'.format(testname, str(n)[1:-1]),
+                ha='right', va='bottom', fontsize=8)
+
+        # set borders
+        ax.spines['left'].set_visible(True)
+        ax.spines['right'].set_visible(False)
+        ax.spines['top'].set_visible(False)
+        ax.spines['bottom'].set_visible(True)
+
+
         plt.show()
     
     
@@ -260,7 +311,7 @@ data = y = [np.random.random(30) * 20 + 5, np.random.random(30) * 20 + 8, np.ran
 print(len(data[0]))
 bar = BarGraph(data)
 # Creating dataset
-bar.draw(vertical = False, barWidth = 0.9, colorsBarsFill = 'red')
+bar.draw(vertical = True, barWidth = 0.9, colorsBarsFill = 'red')
 
 
 # use a decorator function to put what you want on the top of the barplots

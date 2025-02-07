@@ -1,4 +1,6 @@
 import AutoStatLib
+import matplotlib.pyplot as plt
+import numpy as np
 
 class StatsBarPlot():
 
@@ -46,7 +48,7 @@ class StatsBarPlot():
                 va='bottom',
                 color=col)
 
-        # Add custom subtitle aligned to the right at the bottom
+        # Add subtitle aligned to the right at the bottom
         fig.text(0.95, 0.01, '{}\nn={}'.format(testname, str(n)[1:-1]),
                 ha='right', va='bottom', fontsize=8)
 
@@ -78,7 +80,9 @@ analysis = AutoStatLib.StatisticalAnalysis(
 analysis.RunAuto()
 results = analysis.GetResult()
 
-barplot(data,
+plot = StatsBarPlot
+
+plot.barplot(data,data,
         p=results['p-value'],
         stars=results['Stars_Printed'],
         sd=results['Groups_SD'],
